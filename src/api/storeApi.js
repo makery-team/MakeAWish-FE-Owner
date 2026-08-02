@@ -19,3 +19,11 @@ export async function updateStoreProfile(data) {
   if (data.businessHours !== undefined) payload.hours = formatBusinessHours(data.businessHours)
   return client.patch('/api/stores/profile', payload)
 }
+
+export async function suggestProfileImprovement() {
+  return client.get('/api/profile-suggest')
+}
+
+export async function generateBio(payload = {}) {
+  return client.post('/api/generate-bio', payload)
+}

@@ -50,10 +50,17 @@ export const useShopStore = create(
         }
       },
 
-      generateIntro: async () => {
-        await randomDelay(1000, 1700)
-        set((state) => ({ profile: { ...state.profile, intro: STORE_INTRO_DRAFT } }))
-        return STORE_INTRO_DRAFT
+      generateIntro: async (keywords = '') => {
+        try {
+          const res = await storeApi.generateBio({ keywords })
+          const bioText = res?.bio || res?.description || STORE_INTRO_DRAFT
+          set((state) => ({ profile: { ...state.profile, intro: bioText } }))
+          return bioText
+        } catch {
+          await randomDelay(800, 1200)
+          set((state) => ({ profile: { ...state.profile, intro: STORE_INTRO_DRAFT } }))
+          return STORE_INTRO_DRAFT
+        }
       },
 
       replyError: '',
@@ -85,9 +92,16 @@ export const useShopStore = create(
       getReviewSummary: () => REVIEW_SUMMARY,
 
       requestProfileSuggestions: async () => {
-        await randomDelay(900, 1500)
-        set({ suggestions: PROFILE_SUGGESTIONS })
-        return PROFILE_SUGGESTIONS
+        try {
+          const res = await storeApi.suggestProfileImprovement()
+          const list = res?.suggestions || PROFILE_SUGGESTIONS
+          set({ suggestions: list })
+          return list
+        } catch {
+          await randomDelay(700, 1000)
+          set({ suggestions: PROFILE_SUGGESTIONS })
+          return PROFILE_SUGGESTIONS
+        }
       },
 
       fetchPriceAnalysis: async () => {
