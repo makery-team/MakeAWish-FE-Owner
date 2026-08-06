@@ -1,13 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { GoogleLogin } from '@react-oauth/google'
-import { ArrowCounterClockwise, Code } from '@phosphor-icons/react'
 import { useAuthStore } from '../../store/useAuthStore'
-import Button from '../../components/ui/Button'
 
 export default function SplashLogin() {
   const navigate = useNavigate()
-  const { loginWithGoogle, onboarded, resetOnboarding } = useAuthStore()
+  const { loginWithGoogle, onboarded } = useAuthStore()
   const [loading, setLoading] = useState(false)
 
   const handleGoogleSuccess = async (credentialResponse) => {
@@ -20,23 +18,6 @@ export default function SplashLogin() {
       setLoading(false)
       alert('구글 로그인에 실패했습니다: ' + (error.message || '인증 오류'))
     }
-  }
-
-  const handleDevMasterLogin = async () => {
-    try {
-      setLoading(true)
-      await loginWithGoogle('master')
-      setLoading(false)
-      navigate(onboarded ? '/home' : '/onboarding')
-    } catch (error) {
-      setLoading(false)
-      alert('로그인에 실패했습니다: ' + (error.message || '인증 오류'))
-    }
-  }
-
-  const handleResetOnboarding = () => {
-    resetOnboarding()
-    alert('온보딩 상태가 초기화되었습니다! 지금 로그인하시면 사업자등록증(OCR) 온보딩 화면으로 이동합니다.')
   }
 
   return (
@@ -80,28 +61,6 @@ export default function SplashLogin() {
         <p className="text-center text-[11px] text-cake-ink-soft">
           로그인 시 파트너 이용약관에 동의하는 것으로 간주돼요
         </p>
-
-        {/* 2. 개발/테스트용 간편 로그인 및 온보딩 리셋 영역 */}
-        <div className="mt-4 flex w-full flex-col items-center gap-2.5 rounded-2xl bg-white/60 p-3 ring-1 ring-cake-pink-100">
-          <Button
-            variant="secondary"
-            onClick={handleDevMasterLogin}
-            loading={loading}
-            className="w-full py-2.5 text-xs text-cake-ink font-semibold"
-          >
-            <Code size={16} className="text-cake-pink-500" />
-            🛠️ 개발 모드 간편 로그인 (Master 계정)
-          </Button>
-
-          <button
-            type="button"
-            onClick={handleResetOnboarding}
-            className="flex items-center gap-1 text-[11px] font-medium text-cake-ink-soft underline transition hover:text-cake-pink-600"
-          >
-            <ArrowCounterClockwise size={12} />
-            온보딩 화면(OCR 인증) 다시 체험하기
-          </button>
-        </div>
       </div>
     </div>
   )

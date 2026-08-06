@@ -33,39 +33,14 @@ export const INITIAL_ORDERS = [
     createdAt: addDaysIso(-2),
     schemaAnswers: { size: '빅(5호)', pickupDate: addDaysIso(0), lettering: '5살 서준이 생일 축하해', refImage: 'https://picsum.photos/seed/order-2/400/400', request: '공룡은 초록색으로 부탁드려요' },
   },
-  {
-    id: 'order_003',
-    customerName: '박하은',
-    customerPhone: '010-3234-5673',
-    cakeType: '데일리 케이크',
-    requestedDate: addDaysIso(0),
-    pickupTime: '11:00',
-    status: 'IN_PROGRESS',
-    price: 32000,
-    createdAt: addDaysIso(-1),
-    schemaAnswers: { size: '미니(2호)', pickupDate: addDaysIso(0), lettering: '', refImage: '', request: '심플하게 부탁드려요' },
-  },
-  {
-    id: 'order_005',
-    customerName: '정도윤',
-    customerPhone: '010-5234-5675',
-    cakeType: '포토 케이크',
-    requestedDate: addDaysIso(0),
-    pickupTime: '18:00',
-    status: 'COMPLETED',
-    price: 52000,
-    createdAt: addDaysIso(-2),
-    schemaAnswers: { size: '기본(3호)', pickupDate: addDaysIso(0), lettering: '우리 가족 화이팅', refImage: 'https://picsum.photos/seed/order-5/400/400', request: '' },
-  },
 ]
 
 export const INITIAL_EXTRA_CHARGES = [
   { id: 'extra_001', orderId: 'order_002', reason: '토핑 추가 (초코볼)', amount: 5000, createdAt: addDaysIso(-1) },
-  { id: 'extra_002', orderId: 'order_009', reason: '리본 장식 추가', amount: 10000, createdAt: addDaysIso(0) },
 ]
 
 export const INITIAL_PAYMENTS = [
-  { orderId: 'order_005', amount: 52000, method: 'CARD', status: 'PAID', paidAt: addDaysIso(0) },
+  { orderId: 'order_002', amount: 68000, method: 'CARD', status: 'PAID', paidAt: addDaysIso(0) },
 ]
 
 export const INITIAL_CHATS = {
@@ -78,13 +53,6 @@ export const INITIAL_CHATS = {
 export const INITIAL_PORTFOLIOS = [
   { id: 'p1', title: '파스텔 무지개 버터크림 케이크', tags: ['버터크림', '파스텔', '생일'], imageUrl: 'https://picsum.photos/seed/cake-1/600/600', description: '알록달록 파스텔톤 버터크림 케이크' },
   { id: 'p2', title: '미니멀 화이트 웨딩케이크', tags: ['웨딩', '미니멀', '화이트'], imageUrl: 'https://picsum.photos/seed/cake-2/600/600', description: '심플하고 우아한 3단 웨딩케이크' },
-  { id: 'p3', title: '공룡 캐릭터 케이크', tags: ['캐릭터', '아이생일', '공룡'], imageUrl: 'https://picsum.photos/seed/cake-3/600/600', description: '아이들이 좋아하는 공룡 캐릭터 케이크' },
-  { id: 'p4', title: '플라워 레터링 케이크', tags: ['플라워', '레터링', '기념일'], imageUrl: 'https://picsum.photos/seed/cake-4/600/600', description: '생화 느낌의 플라워 장식 레터링 케이크' },
-  { id: 'p5', title: '스머프 캐릭터 케이크', tags: ['캐릭터', '아이생일'], imageUrl: 'https://picsum.photos/seed/cake-5/600/600', description: '파란 스머프 캐릭터 입체 케이크' },
-  { id: 'p6', title: '베이비샤워 클라우드 케이크', tags: ['베이비샤워', '파스텔', '구름'], imageUrl: 'https://picsum.photos/seed/cake-6/600/600', description: '몽글몽글 구름 장식의 베이비샤워 케이크' },
-  { id: 'p7', title: '초코 드립 케이크', tags: ['초코', '데일리'], imageUrl: 'https://picsum.photos/seed/cake-7/600/600', description: '진한 초콜릿 드립 데일리 케이크' },
-  { id: 'p8', title: '곰돌이 반달 케이크', tags: ['캐릭터', '반달', '귀여움'], imageUrl: 'https://picsum.photos/seed/cake-8/600/600', description: '반달 모양의 귀여운 곰돌이 케이크' },
-  { id: 'p9', title: '리본 장식 골드 케이크', tags: ['골드', '리본', '프리미엄'], imageUrl: 'https://picsum.photos/seed/cake-9/600/600', description: '골드 리본으로 포인트를 준 프리미엄 케이크' },
 ]
 
 export const PORTFOLIO_TAG_POOL = [
@@ -95,10 +63,6 @@ export const PORTFOLIO_TAG_POOL = [
 export const INITIAL_REVIEWS = [
   { id: 'r1', customerName: '이지은', rating: 5, content: '레터링이 정말 예뻤어요! 다음에도 또 주문할게요', reply: null, createdAt: addDaysIso(-3) },
   { id: 'r2', customerName: '박준서', rating: 4, content: '맛있었는데 픽업 시간이 조금 늦어졌어요', reply: '소중한 후기 감사합니다! 다음엔 더 신경쓸게요 :)', createdAt: addDaysIso(-5) },
-  { id: 'r3', customerName: '최나은', rating: 5, content: '아이가 너무 좋아했어요 감사합니다', reply: null, createdAt: addDaysIso(-6) },
-  { id: 'r4', customerName: '김도현', rating: 3, content: '사진이랑 조금 다른 느낌이었어요', reply: null, createdAt: addDaysIso(-8) },
-  { id: 'r5', customerName: '오세훈', rating: 5, content: '포장까지 완벽했습니다', reply: '감사합니다 사장님 마음까지 담아 포장했어요!', createdAt: addDaysIso(-10) },
-  { id: 'r6', customerName: '한유정', rating: 4, content: '친절하고 빨랐어요', reply: null, createdAt: addDaysIso(-12) },
 ]
 
 export const INITIAL_STORE_PROFILE = {
