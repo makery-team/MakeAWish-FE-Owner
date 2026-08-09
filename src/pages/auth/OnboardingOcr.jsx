@@ -5,6 +5,7 @@ import { useAuthStore } from '../../store/useAuthStore'
 import Button from '../../components/ui/Button'
 import Card from '../../components/ui/Card'
 import Spinner from '../../components/ui/Spinner'
+import AddressSearchModal from '../../components/ui/AddressSearchModal'
 import { INITIAL_STORE_PROFILE } from '../../mocks/seed'
 
 export default function OnboardingOcr() {
@@ -18,6 +19,8 @@ export default function OnboardingOcr() {
   const [storeName, setStoreName] = useState('')
   const [phone, setPhone] = useState('')
   const [address, setAddress] = useState('')
+  const [detailAddress, setDetailAddress] = useState('')
+  const [isAddressModalOpen, setIsAddressModalOpen] = useState(false)
   const [hoursForm, setHoursForm] = useState(INITIAL_STORE_PROFILE.businessHours)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -40,7 +43,8 @@ export default function OnboardingOcr() {
     
     setIsSubmitting(true)
     try {
-      await completeOnboarding({ name: storeName, phone, address, hours: hoursForm })
+      const finalAddress = detailAddress ? `${address}, ${detailAddress}` : address
+      await completeOnboarding({ name: storeName, phone, address: finalAddress, hours: hoursForm })
       navigate('/home')
     } catch (error) {
       alert('매장 개설에 실패했습니다. 다시 시도해주세요.')
@@ -139,16 +143,31 @@ export default function OnboardingOcr() {
                 />
               </label>
 
-              <label className="flex flex-col gap-1.5 mt-2">
-                <span className="text-sm font-semibold text-cake-ink">주소 (선택)</span>
-                <input
-                  type="text"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  placeholder="예: 서울특별시 마포구 월드컵로 123"
-                  className="rounded-xl border border-cake-pink-200 px-4 py-3 text-sm outline-none focus:border-cake-pink-400 focus:ring-2 focus:ring-cake-pink-100"
-                />
-              </label>
+              <div className="flex flex-col gap-1.5 mt-2">
+                <span className="text-sm font-semibold text-cake-ink">매장 주소 (선택)</span>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={address}
+                    readOnly
+                    placeholder="버튼을 눌러 주소를 검색하세요"
+                    className="flex-1 rounded-xl border border-cake-pink-200 px-4 py-3 text-sm bg-gray-50 text-gray-600 outline-none cursor-pointer"
+                    onClick={() => setIsAddressModalOpen(true)}
+                  />
+                  <Button type="button" onClick={() => setIsAddressModalOpen(true)} className="whitespace-nowrap px-4">
+                    주소 찾기
+                  </Button>
+                </div>
+                {address && (
+                  <input
+                    type="text"
+                    value={detailAddress}
+                    onChange={(e) => setDetailAddress(e.target.value)}
+                    placeholder="상세 주소를 입력해주세요 (예: 2층 201호)"
+                    className="mt-1 rounded-xl border border-cake-pink-200 px-4 py-3 text-sm outline-none focus:border-cake-pink-400 focus:ring-2 focus:ring-cake-pink-100"
+                  />
+                )}
+              </div>
 
               <div className="flex flex-col gap-1.5 mt-2">
                 <span className="text-sm font-semibold text-cake-ink">기본 운영시간 (선택)</span>
@@ -232,6 +251,16 @@ export default function OnboardingOcr() {
           </button>
         )}
       </div>
+
+      {isAddressModalOpen && (
+        <AddressSearchModal
+          onClose={() => setIsAddressModalOpen(false)}
+          onComplete={(addr) => {
+            setAddress(addr)
+            setIsAddressModalOpen(false)
+          }}
+        />
+      )}
     </div>
   )
 }

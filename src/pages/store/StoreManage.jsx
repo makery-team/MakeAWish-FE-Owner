@@ -6,6 +6,7 @@ import PageHeader from '../../components/ui/PageHeader'
 import Card from '../../components/ui/Card'
 import Button from '../../components/ui/Button'
 import Spinner from '../../components/ui/Spinner'
+import AddressSearchModal from '../../components/ui/AddressSearchModal'
 
 export default function StoreManage() {
   const { businessLicense } = useAuthStore()
@@ -37,6 +38,7 @@ export default function StoreManage() {
 
   const [editing, setEditing] = useState(false)
   const [form, setForm] = useState(profile)
+  const [isAddressModalOpen, setIsAddressModalOpen] = useState(false)
   const [savingProfile, setSavingProfile] = useState(false)
   const [hoursEditing, setHoursEditing] = useState(false)
   const [hoursForm, setHoursForm] = useState(profile.businessHours)
@@ -104,12 +106,18 @@ export default function StoreManage() {
           </div>
           {editing && (
             <div className="mt-3 flex flex-col gap-2">
-              <input
-                value={form.address}
-                onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
-                placeholder="주소"
-                className="rounded-xl border border-cake-pink-200 px-3 py-2 text-sm outline-none"
-              />
+              <div className="flex gap-2">
+                <input
+                  value={form.address}
+                  readOnly
+                  placeholder="주소 찾기 버튼을 눌러주세요"
+                  className="flex-1 rounded-xl border border-cake-pink-200 px-3 py-2 text-sm bg-gray-50 text-gray-600 outline-none cursor-pointer"
+                  onClick={() => setIsAddressModalOpen(true)}
+                />
+                <Button type="button" onClick={() => setIsAddressModalOpen(true)} className="whitespace-nowrap px-3 py-2 text-sm">
+                  주소 찾기
+                </Button>
+              </div>
               <input
                 value={form.phone}
                 onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
@@ -428,6 +436,16 @@ export default function StoreManage() {
           </div>
         </Card>
       </div>
+
+      {isAddressModalOpen && (
+        <AddressSearchModal
+          onClose={() => setIsAddressModalOpen(false)}
+          onComplete={(addr) => {
+            setForm((f) => ({ ...f, address: addr }))
+            setIsAddressModalOpen(false)
+          }}
+        />
+      )}
     </div>
   )
 }
