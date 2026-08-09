@@ -23,12 +23,6 @@ export const useAuthStore = create(
         try {
           const res = await socialLogin('google', token)
 
-          // 개발용: 로그인 성공 시 받은 JWT를 브라우저 콘솔에 출력 (F12 → Console에서 확인)
-          console.log('[로그인 성공] accessToken:', res.accessToken)
-          if (res.refreshToken) {
-            console.log('[로그인 성공] refreshToken:', res.refreshToken)
-          }
-
           // 1. 공통 client.js에서 조회할 수 있도록 localStorage에 보관
           if (res.accessToken) {
             localStorage.setItem('auth_token', res.accessToken)

@@ -17,6 +17,13 @@ export async function updateStoreProfile(data) {
   if (data.storeName !== undefined) payload.name = data.storeName
   if (data.intro !== undefined) payload.description = data.intro
   if (data.businessHours !== undefined) payload.hours = formatBusinessHours(data.businessHours)
+  
+  // 누락되었던 필드 추가 매핑
+  if (data.address !== undefined) payload.address = data.address
+  if (data.phone !== undefined) payload.phone = data.phone
+  if (data.notice !== undefined) payload.notice = data.notice
+  if (data.cautionNotice !== undefined) payload.cautionNotice = data.cautionNotice
+
   return client.patch('/api/stores/profile', payload)
 }
 
