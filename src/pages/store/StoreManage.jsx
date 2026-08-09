@@ -95,7 +95,7 @@ export default function StoreManage() {
               ) : (
                 <p className="font-display text-lg text-cake-ink">{profile.storeName}</p>
               )}
-              <p className="text-xs text-cake-ink-soft">{profile.category} · {profile.ownerName}</p>
+              <p className="text-xs text-cake-ink-soft">{profile.ownerName}</p>
             </div>
             <button
               onClick={() => (editing ? saveProfile() : setEditing(true))}
