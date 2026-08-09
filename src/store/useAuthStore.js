@@ -57,6 +57,7 @@ export const useAuthStore = create(
             onboarded: isOnboarded,
             user: {
               name: profile.nickname || profile.name || res.name || '사장님',
+              realName: profile.name || res.name || '사장님',
               email: profile.email || 'partner@dalkomgongbang.com',
               avatar: 'https://picsum.photos/seed/owner-avatar/200/200',
             },

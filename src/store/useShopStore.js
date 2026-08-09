@@ -43,7 +43,7 @@ export const useShopStore = create(
             profile: {
               ...state.profile,
               storeName: data.name || '',
-              ownerName: currentUser?.name || '',
+              ownerName: currentUser?.realName || currentUser?.name || '',
               category: '미설정', // 백엔드 카테고리가 아직 연동 안됨
               intro: data.description || '',
               address: data.address || '',
