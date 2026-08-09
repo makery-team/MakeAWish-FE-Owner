@@ -128,7 +128,10 @@ export default function StoreManage() {
             </div>
           )}
           {!editing && (
-            <p className="mt-2 text-xs text-cake-ink-soft">{profile.address} · {profile.phone}</p>
+            <p className="mt-2 text-xs text-cake-ink-soft">
+              {profile.address}
+              {profile.phone ? ` · ${profile.phone}` : ''}
+            </p>
           )}
         </Card>
 
