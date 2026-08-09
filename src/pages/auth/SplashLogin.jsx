@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { GoogleLogin } from '@react-oauth/google'
 import { useAuthStore } from '../../store/useAuthStore'
@@ -6,16 +5,12 @@ import { useAuthStore } from '../../store/useAuthStore'
 export default function SplashLogin() {
   const navigate = useNavigate()
   const { loginWithGoogle, onboarded } = useAuthStore()
-  const [loading, setLoading] = useState(false)
 
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
-      setLoading(true)
       await loginWithGoogle(credentialResponse.credential)
-      setLoading(false)
       navigate(onboarded ? '/home' : '/onboarding')
     } catch (error) {
-      setLoading(false)
       alert('구글 로그인에 실패했습니다: ' + (error.message || '인증 오류'))
     }
   }

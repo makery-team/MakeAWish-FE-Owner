@@ -1,5 +1,10 @@
 import { client } from './client'
 
+export async function fetchStorePortfolios(storeId = 1) {
+  const res = await client.get(`/api/stores/${storeId}`)
+  return res.categories.flatMap((c) => c.portfolios).filter((p) => p.storeId === storeId)
+}
+
 export async function uploadPortfolioImage(file) {
   const formData = new FormData()
   formData.append('file', file)

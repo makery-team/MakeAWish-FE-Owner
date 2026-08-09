@@ -18,15 +18,3 @@ export async function socialLogin(provider = 'google', token) {
 export async function refreshAccessToken(refreshToken) {
   return client.post('/api/token', { refreshToken })
 }
-
-/**
- * 개발/로컬 테스트용 마스터 토큰 로그인 헬퍼
- * 백엔드 SecurityConfig/MasterKeyFilter에서 "Bearer master" 헤더 요청 시 1번 사장님 유저로 자동 로그인 지원
- */
-export function devMasterLogin() {
-  return Promise.resolve({
-    accessToken: 'master',
-    refreshToken: 'master',
-    name: '사장님 (Master 테스트)',
-  })
-}

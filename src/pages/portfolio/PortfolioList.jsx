@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Plus } from '@phosphor-icons/react'
 import { usePortfolioStore } from '../../store/usePortfolioStore'
@@ -5,7 +6,11 @@ import PageHeader from '../../components/ui/PageHeader'
 
 export default function PortfolioList() {
   const navigate = useNavigate()
-  const { portfolios } = usePortfolioStore()
+  const { portfolios, portfoliosError, fetchPortfolios } = usePortfolioStore()
+
+  useEffect(() => {
+    fetchPortfolios()
+  }, [fetchPortfolios])
 
   return (
     <div className="pb-6">
@@ -22,6 +27,8 @@ export default function PortfolioList() {
           </button>
         }
       />
+
+      {portfoliosError && <p className="px-5 pb-2 text-xs font-medium text-red-500">{portfoliosError}</p>}
 
       <div className="grid grid-cols-2 gap-3 px-5">
         {portfolios.map((p) => (

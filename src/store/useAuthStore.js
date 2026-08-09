@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { randomDelay } from '../lib/time'
 import { INITIAL_BUSINESS_LICENSE } from '../mocks/seed'
-import { socialLogin, devMasterLogin } from '../api/authApi'
+import { socialLogin } from '../api/authApi'
 
 export const useAuthStore = create(
   persist(
@@ -16,15 +16,18 @@ export const useAuthStore = create(
       businessLicense: null,
 
       /**
-       * 구글 OAuth 토큰 또는 마스터 토큰으로 백엔드 로그인 API 연동
-       * @param {string} [token='master'] - 구글 인증 토큰 (미입력 시 개발/테스트용 마스터 토큰 사용)
+       * 구글 OAuth 토큰으로 백엔드 로그인 API 연동
+       * @param {string} token - 구글 인증 토큰 (idToken)
        */
-      loginWithGoogle: async (token = 'master') => {
+      loginWithGoogle: async (token) => {
         try {
-          const res =
-            token === 'master' || !token
-              ? await devMasterLogin()
-              : await socialLogin('google', token)
+          const res = await socialLogin('google', token)
+
+          // 개발용: 로그인 성공 시 받은 JWT를 브라우저 콘솔에 출력 (F12 → Console에서 확인)
+          console.log('[로그인 성공] accessToken:', res.accessToken)
+          if (res.refreshToken) {
+            console.log('[로그인 성공] refreshToken:', res.refreshToken)
+          }
 
           // 1. 공통 client.js에서 조회할 수 있도록 localStorage에 보관
           if (res.accessToken) {
