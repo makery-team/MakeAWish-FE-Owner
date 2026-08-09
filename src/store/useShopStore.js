@@ -22,6 +22,43 @@ export const useShopStore = create(
       priceAnalysis: null,
       profileError: '',
 
+      fetchProfile: async () => {
+        set({ profileError: '' })
+        try {
+          const data = await storeApi.getMyStoreProfile()
+          // useAuthStore에서 현재 로그인된 유저 정보를 가져와 대표자명으로 사용
+          const { useAuthStore } = await import('./useAuthStore')
+          const currentUser = useAuthStore.getState().user
+
+          let parsedHours = state.profile.businessHours
+          if (data.hours) {
+            try {
+              parsedHours = JSON.parse(data.hours)
+            } catch (e) {
+              console.warn('운영시간 JSON 파싱 실패:', e)
+            }
+          }
+
+          set((state) => ({
+            profile: {
+              ...state.profile,
+              storeName: data.name || '',
+              ownerName: currentUser?.name || '',
+              category: '미설정', // 백엔드 카테고리가 아직 연동 안됨
+              intro: data.description || '',
+              address: data.address || '',
+              phone: data.phone || '',
+              notice: data.notice || '',
+              cautionNotice: data.cautionNotice || '',
+              businessHours: parsedHours,
+            },
+          }))
+        } catch (err) {
+          // 조회 실패 시 (예: 매장이 아직 없는 경우) 에러 메시지를 남깁니다.
+          set({ profileError: err.message || '매장 정보를 불러오지 못했어요' })
+        }
+      },
+
       fetchReviews: async (storeId = 1) => {
         set({ reviewsError: '' })
         try {
