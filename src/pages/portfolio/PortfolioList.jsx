@@ -4,13 +4,18 @@ import { Plus } from '@phosphor-icons/react'
 import { usePortfolioStore } from '../../store/usePortfolioStore'
 import PageHeader from '../../components/ui/PageHeader'
 
+import { useShopStore } from '../../store/useShopStore'
+
 export default function PortfolioList() {
   const navigate = useNavigate()
   const { portfolios, portfoliosError, fetchPortfolios } = usePortfolioStore()
+  const { profile } = useShopStore()
 
   useEffect(() => {
-    fetchPortfolios()
-  }, [fetchPortfolios])
+    if (profile.id) {
+      fetchPortfolios(profile.id)
+    }
+  }, [fetchPortfolios, profile.id])
 
   return (
     <div className="pb-6">

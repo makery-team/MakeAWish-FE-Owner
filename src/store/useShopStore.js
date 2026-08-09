@@ -42,9 +42,11 @@ export const useShopStore = create(
           set((state) => ({
             profile: {
               ...state.profile,
+              id: data.id,
               storeName: data.name || '',
               ownerName: currentUser?.realName || currentUser?.name || '',
               category: '미설정', // 백엔드 카테고리가 아직 연동 안됨
+              categories: data.categories || [],
               intro: data.description || '',
               address: data.address || '',
               phone: data.phone || '',
