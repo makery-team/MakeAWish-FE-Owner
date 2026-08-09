@@ -30,7 +30,7 @@ export const useShopStore = create(
           const { useAuthStore } = await import('./useAuthStore')
           const currentUser = useAuthStore.getState().user
 
-          let parsedHours = state.profile.businessHours
+          let parsedHours = get().profile.businessHours
           if (data.hours) {
             try {
               parsedHours = JSON.parse(data.hours)
