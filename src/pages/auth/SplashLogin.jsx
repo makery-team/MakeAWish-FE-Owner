@@ -8,8 +8,8 @@ export default function SplashLogin() {
 
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
-      await loginWithGoogle(credentialResponse.credential)
-      navigate(onboarded ? '/home' : '/onboarding')
+      const res = await loginWithGoogle(credentialResponse.credential)
+      navigate(res.isOnboarded ? '/home' : '/onboarding')
     } catch (error) {
       alert('구글 로그인에 실패했습니다: ' + (error.message || '인증 오류'))
     }

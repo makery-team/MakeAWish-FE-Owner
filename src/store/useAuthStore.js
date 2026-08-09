@@ -57,7 +57,7 @@ export const useAuthStore = create(
               avatar: 'https://picsum.photos/seed/owner-avatar/200/200',
             },
           })
-          return res
+          return { ...res, isOnboarded }
         } catch (error) {
           console.error('로그인 API 연동 실패:', error)
           throw error
