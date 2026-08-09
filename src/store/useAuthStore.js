@@ -38,11 +38,15 @@ export const useAuthStore = create(
           let profile = {}
           try {
             profile = await userApi.getUserProfile()
+            // 디버깅: 백엔드에서 받아온 프로필 값 확인
+            alert('디버깅: 서버에서 받은 역할은 -> ' + profile.userRole)
+
             if (profile.userRole === 'ROLE_SELLER') {
               isOnboarded = true
             }
           } catch (e) {
             console.warn('프로필 조회 실패 (초기 가입자일 수 있음):', e)
+            alert('디버깅: 프로필 조회 실패! ' + e.message)
           }
 
           // 3. Zustand 스토어 상태 갱신
@@ -113,6 +117,7 @@ export const useAuthStore = create(
               storeName: storeData.name,
               address: storeData.address,
               businessHours: storeData.hours,
+              phone: storeData.phone,
             })
           }
 
