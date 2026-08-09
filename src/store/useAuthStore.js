@@ -33,14 +33,27 @@ export const useAuthStore = create(
             localStorage.setItem('refresh_token', res.refreshToken)
           }
 
-          // 2. Zustand 스토어 상태 갱신
+          // 2. 프로필 정보를 조회하여 온보딩(사장님 권한) 여부 확인
+          let isOnboarded = false
+          let profile = {}
+          try {
+            profile = await userApi.getUserProfile()
+            if (profile.userRole === 'ROLE_SELLER') {
+              isOnboarded = true
+            }
+          } catch (e) {
+            console.warn('프로필 조회 실패 (초기 가입자일 수 있음):', e)
+          }
+
+          // 3. Zustand 스토어 상태 갱신
           set({
             isLoggedIn: true,
             token: res.accessToken,
             refreshToken: res.refreshToken,
+            onboarded: isOnboarded,
             user: {
-              name: res.name || '사장님',
-              email: 'partner@dalkomgongbang.com',
+              name: profile.nickname || profile.name || res.name || '사장님',
+              email: profile.email || 'partner@dalkomgongbang.com',
               avatar: 'https://picsum.photos/seed/owner-avatar/200/200',
             },
           })
