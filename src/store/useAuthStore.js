@@ -110,16 +110,14 @@ export const useAuthStore = create(
             isSeller: true,
           })
 
-          // 2. 주소나 운영시간 정보가 있다면 생성 직후 곧바로 수정 API 호출
-          if (storeData.address || storeData.hours) {
-            const { updateStoreProfile } = await import('../api/storeApi')
-            await updateStoreProfile({
-              storeName: storeData.name,
-              address: storeData.address,
-              businessHours: storeData.hours,
-              phone: storeData.phone,
-            })
-          }
+          // 2. 생성 직후 곧바로 수정 API 호출하여 상호명, 연락처, 주소 등 최신화
+          const { updateStoreProfile } = await import('../api/storeApi')
+          await updateStoreProfile({
+            storeName: storeData.name,
+            address: storeData.address,
+            businessHours: storeData.hours,
+            phone: storeData.phone,
+          })
 
           // 3. 프론트엔드 온보딩 완료 상태 저장
           set({ onboarded: true })

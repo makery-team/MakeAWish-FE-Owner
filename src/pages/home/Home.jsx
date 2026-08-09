@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { Sparkle, CaretRight, ChartBar } from '@phosphor-icons/react'
 import { useAuthStore } from '../../store/useAuthStore'
+import { useShopStore } from '../../store/useShopStore'
 import { useOrderStore } from '../../store/useOrderStore'
 import Card from '../../components/ui/Card'
 import { StatusBadge } from '../../components/ui/Badge'
@@ -8,7 +9,7 @@ import EmptyState from '../../components/ui/EmptyState'
 
 export default function Home() {
   const navigate = useNavigate()
-  const { user } = useAuthStore()
+  const { profile } = useShopStore()
   const { getTodayOrders, getTodayBriefing } = useOrderStore()
   const todayOrders = getTodayOrders()
   const briefing = getTodayBriefing()
@@ -16,7 +17,7 @@ export default function Home() {
   return (
     <div className="px-5 pt-6">
       <p className="text-sm text-cake-ink-soft">안녕하세요 👋</p>
-      <h1 className="font-display text-2xl text-cake-ink">{user?.name} 사장님</h1>
+      <h1 className="font-display text-2xl text-cake-ink">{profile?.storeName || '매장'} 사장님</h1>
 
       <Card className="mt-4 bg-gradient-to-br from-cake-pink-400 to-cake-pink-500 text-white">
         <div className="flex items-center gap-1.5 text-xs font-semibold text-white/90">
