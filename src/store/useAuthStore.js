@@ -2,7 +2,8 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { randomDelay } from '../lib/time'
 import { INITIAL_BUSINESS_LICENSE } from '../mocks/seed'
-import { socialLogin } from '../api/authApi'
+import * as authApi from '../api/authApi'
+import * as userApi from '../api/userApi'
 
 export const useAuthStore = create(
   persist(
@@ -21,7 +22,8 @@ export const useAuthStore = create(
        */
       loginWithGoogle: async (token) => {
         try {
-          const res = await socialLogin('google', token)
+          // 1. 백엔드(Spring)와 OAuth2 통신하여 자체 Access / Refresh 토큰 발급
+          const res = await authApi.socialLogin('google', token)
 
           // 1. 공통 client.js에서 조회할 수 있도록 localStorage에 보관
           if (res.accessToken) {
@@ -31,18 +33,31 @@ export const useAuthStore = create(
             localStorage.setItem('refresh_token', res.refreshToken)
           }
 
-          // 2. Zustand 스토어 상태 갱신
+          // 2. 프로필 정보를 조회하여 온보딩(사장님 권한) 여부 확인
+          let isOnboarded = false
+          let profile = {}
+          try {
+            profile = await userApi.getUserProfile()
+            if (profile.userRole === 'ROLE_SELLER') {
+              isOnboarded = true
+            }
+          } catch (e) {
+            console.warn('프로필 조회 실패 (초기 가입자일 수 있음):', e)
+          }
+
+          // 3. Zustand 스토어 상태 갱신
           set({
             isLoggedIn: true,
             token: res.accessToken,
             refreshToken: res.refreshToken,
+            onboarded: isOnboarded,
             user: {
-              name: res.name || '사장님',
-              email: 'partner@dalkomgongbang.com',
+              name: profile.nickname || profile.name || res.name || '사장님',
+              email: profile.email || 'partner@dalkomgongbang.com',
               avatar: 'https://picsum.photos/seed/owner-avatar/200/200',
             },
           })
-          return res
+          return { ...res, isOnboarded }
         } catch (error) {
           console.error('로그인 API 연동 실패:', error)
           throw error
@@ -81,7 +96,33 @@ export const useAuthStore = create(
         return INITIAL_BUSINESS_LICENSE
       },
 
-      completeOnboarding: () => set({ onboarded: true }),
+      completeOnboarding: async (storeData) => {
+        try {
+          // 1. 백엔드 회원 초기화 API (SellerProfile, Store 동시 생성)
+          await userApi.initUserProfile({
+            nickname: storeData.name,
+            phoneNumber: storeData.phone,
+            language: 'KO',
+            isSeller: true,
+          })
+
+          // 2. 주소나 운영시간 정보가 있다면 생성 직후 곧바로 수정 API 호출
+          if (storeData.address || storeData.hours) {
+            const { updateStoreProfile } = await import('../api/storeApi')
+            await updateStoreProfile({
+              storeName: storeData.name,
+              address: storeData.address,
+              businessHours: storeData.hours,
+            })
+          }
+
+          // 3. 프론트엔드 온보딩 완료 상태 저장
+          set({ onboarded: true })
+        } catch (error) {
+          console.error('매장 개설 실패:', error)
+          throw error
+        }
+      },
     }),
     { name: 'cake-auth' },
   ),

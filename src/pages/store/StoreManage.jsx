@@ -6,6 +6,7 @@ import PageHeader from '../../components/ui/PageHeader'
 import Card from '../../components/ui/Card'
 import Button from '../../components/ui/Button'
 import Spinner from '../../components/ui/Spinner'
+import AddressSearchModal from '../../components/ui/AddressSearchModal'
 
 export default function StoreManage() {
   const { businessLicense } = useAuthStore()
@@ -23,18 +24,21 @@ export default function StoreManage() {
     requestProfileSuggestions,
     fetchPriceAnalysis,
     profileError,
+    fetchProfile,
     deleteReply,
     replyError,
   } = useShopStore()
 
   useEffect(() => {
+    fetchProfile()
     fetchReviews()
-  }, [fetchReviews])
+  }, [fetchProfile, fetchReviews])
 
   const summary = getReviewSummary()
 
   const [editing, setEditing] = useState(false)
   const [form, setForm] = useState(profile)
+  const [isAddressModalOpen, setIsAddressModalOpen] = useState(false)
   const [savingProfile, setSavingProfile] = useState(false)
   const [hoursEditing, setHoursEditing] = useState(false)
   const [hoursForm, setHoursForm] = useState(profile.businessHours)
@@ -102,12 +106,18 @@ export default function StoreManage() {
           </div>
           {editing && (
             <div className="mt-3 flex flex-col gap-2">
-              <input
-                value={form.address}
-                onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
-                placeholder="주소"
-                className="rounded-xl border border-cake-pink-200 px-3 py-2 text-sm outline-none"
-              />
+              <div className="flex gap-2">
+                <input
+                  value={form.address}
+                  readOnly
+                  placeholder="주소 찾기 버튼을 눌러주세요"
+                  className="flex-1 rounded-xl border border-cake-pink-200 px-3 py-2 text-sm bg-gray-50 text-gray-600 outline-none cursor-pointer"
+                  onClick={() => setIsAddressModalOpen(true)}
+                />
+                <Button type="button" onClick={() => setIsAddressModalOpen(true)} className="whitespace-nowrap px-3 py-2 text-sm">
+                  주소 찾기
+                </Button>
+              </div>
               <input
                 value={form.phone}
                 onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
@@ -248,20 +258,26 @@ export default function StoreManage() {
           )}
         </Card>
 
+        {/* 사업자등록증 */}
         <Card>
-          <p className="flex items-center gap-1.5 text-sm font-bold text-cake-ink"><IdentificationCard size={16} className="text-cake-pink-500" /> 사업자등록증</p>
-          {businessLicense ? (
-            <dl className="mt-2 grid grid-cols-3 gap-y-1 text-xs">
-              <dt className="text-cake-ink-soft">사업자번호</dt>
-              <dd className="col-span-2 text-cake-ink">{businessLicense.businessNumber}</dd>
-              <dt className="text-cake-ink-soft">대표자</dt>
-              <dd className="col-span-2 text-cake-ink">{businessLicense.ownerName}</dd>
-              <dt className="text-cake-ink-soft">개업일</dt>
-              <dd className="col-span-2 text-cake-ink">{businessLicense.openDate}</dd>
-            </dl>
-          ) : (
-            <p className="mt-2 text-xs text-cake-ink-soft">등록된 사업자등록증이 없어요</p>
-          )}
+          <div className="mb-4 flex items-center gap-2 text-cake-ink">
+            <IdentificationCard weight="fill" className="text-xl text-cake-pink-500" />
+            <h3 className="font-display font-bold">사업자등록증</h3>
+          </div>
+          <div className="space-y-2 text-sm text-cake-ink-soft">
+            <div className="flex justify-between">
+              <span className="font-medium text-cake-ink">사업자번호</span>
+              <span>{businessLicense?.businessNo || '등록 필요'}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-medium text-cake-ink">대표자</span>
+              <span>{businessLicense?.owner || profile.ownerName || '미설정'}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-medium text-cake-ink">개업일</span>
+              <span>{businessLicense?.openDate || '등록 필요'}</span>
+            </div>
+          </div>
         </Card>
 
         <Card>
@@ -420,6 +436,16 @@ export default function StoreManage() {
           </div>
         </Card>
       </div>
+
+      {isAddressModalOpen && (
+        <AddressSearchModal
+          onClose={() => setIsAddressModalOpen(false)}
+          onComplete={(addr) => {
+            setForm((f) => ({ ...f, address: addr }))
+            setIsAddressModalOpen(false)
+          }}
+        />
+      )}
     </div>
   )
 }
