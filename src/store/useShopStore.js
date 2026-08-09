@@ -81,9 +81,10 @@ export const useShopStore = create(
       },
 
       updateProfile: async (data) => {
-        set((state) => ({ profile: { ...state.profile, ...data }, profileError: '' }))
+        const updatedProfile = { ...get().profile, ...data }
+        set({ profile: updatedProfile, profileError: '' })
         try {
-          await storeApi.updateStoreProfile(data)
+          await storeApi.updateStoreProfile(updatedProfile)
         } catch (err) {
           set({ profileError: err.message || '저장에 실패했어요. 다시 시도해주세요' })
         }
