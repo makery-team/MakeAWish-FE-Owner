@@ -119,6 +119,7 @@ export const useAuthStore = create(
             address: storeData.address,
             businessHours: storeData.hours,
             phone: storeData.phone,
+            keywords: storeData.keywords,
           })
 
           // 3. Zustand 매장 스토어 강제 갱신 (캐시된 옛날 이름 방지)
