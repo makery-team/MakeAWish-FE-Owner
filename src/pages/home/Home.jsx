@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Sparkle, CaretRight, ChartBar } from '@phosphor-icons/react'
 import { useAuthStore } from '../../store/useAuthStore'
@@ -9,10 +10,15 @@ import EmptyState from '../../components/ui/EmptyState'
 
 export default function Home() {
   const navigate = useNavigate()
-  const { profile } = useShopStore()
+  const { profile, fetchProfile } = useShopStore()
   const { getTodayOrders, getTodayBriefing } = useOrderStore()
   const todayOrders = getTodayOrders()
   const briefing = getTodayBriefing()
+
+  // 홈 화면 진입 시 서버에서 최신 매장 프로필 조회
+  useEffect(() => {
+    fetchProfile()
+  }, [fetchProfile])
 
   return (
     <div className="px-5 pt-6">
