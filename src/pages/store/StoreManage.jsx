@@ -130,13 +130,21 @@ export default function StoreManage() {
                 placeholder="연락처"
                 className="rounded-xl border border-cake-pink-200 px-3 py-2 text-sm outline-none"
               />
+              <input
+                value={form.keywords}
+                onChange={(e) => setForm((f) => ({ ...f, keywords: e.target.value }))}
+                placeholder="매장 핵심 키워드 (예: 수제 케이크, 레터링)"
+                className="rounded-xl border border-cake-pink-200 px-3 py-2 text-sm outline-none"
+              />
               <Button loading={savingProfile} onClick={saveProfile} className="mt-1 w-full">저장하기</Button>
             </div>
           )}
           {!editing && (
-            <p className="mt-2 text-xs text-cake-ink-soft">
-              {profile.address}
-              {profile.phone ? ` · ${profile.phone}` : ''}
+            <p className="mt-2 text-xs text-cake-ink-soft flex flex-col gap-1">
+              <span>{profile.address}{profile.phone ? ` · ${profile.phone}` : ''}</span>
+              {profile.keywords && (
+                <span className="font-semibold text-cake-pink-500">#{profile.keywords.split(',').map(k => k.trim()).join(' #')}</span>
+              )}
             </p>
           )}
         </Card>
