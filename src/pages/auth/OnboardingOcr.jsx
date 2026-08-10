@@ -124,6 +124,7 @@ export default function OnboardingOcr() {
                   type="text"
                   value={storeName}
                   onChange={(e) => setStoreName(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault() }}
                   placeholder="예: 달콤공방"
                   className="rounded-xl border border-cake-pink-200 px-4 py-3 text-sm outline-none focus:border-cake-pink-400 focus:ring-2 focus:ring-cake-pink-100"
                   required
@@ -138,6 +139,7 @@ export default function OnboardingOcr() {
                   type="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault() }}
                   placeholder="예: 010-1234-5678"
                   className="rounded-xl border border-cake-pink-200 px-4 py-3 text-sm outline-none focus:border-cake-pink-400 focus:ring-2 focus:ring-cake-pink-100"
                   required
@@ -152,6 +154,7 @@ export default function OnboardingOcr() {
                   type="text"
                   value={keywords}
                   onChange={(e) => setKeywords(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault() }}
                   placeholder="예: 수제 케이크, 레터링, 귀여운"
                   className="rounded-xl border border-cake-pink-200 px-4 py-3 text-sm outline-none focus:border-cake-pink-400 focus:ring-2 focus:ring-cake-pink-100"
                 />
@@ -167,6 +170,7 @@ export default function OnboardingOcr() {
                     type="text"
                     value={address}
                     readOnly
+                    onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault() }}
                     placeholder="버튼을 눌러 주소를 검색하세요"
                     className="flex-1 rounded-xl border border-cake-pink-200 px-4 py-3 text-sm bg-gray-50 text-gray-600 outline-none cursor-pointer"
                     onClick={() => setIsAddressModalOpen(true)}
@@ -180,6 +184,7 @@ export default function OnboardingOcr() {
                     type="text"
                     value={detailAddress}
                     onChange={(e) => setDetailAddress(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault() }}
                     placeholder="상세 주소를 입력해주세요 (예: 2층 201호)"
                     className="mt-1 rounded-xl border border-cake-pink-200 px-4 py-3 text-sm outline-none focus:border-cake-pink-400 focus:ring-2 focus:ring-cake-pink-100"
                   />
