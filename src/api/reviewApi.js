@@ -1,8 +1,12 @@
 import { client } from './client'
 
-export async function fetchStoreReviews(storeId = 1) {
+export async function fetchStoreReviews(storeId) {
   const res = await client.get(`/api/stores/${storeId}/reviews`)
   return res.content
+}
+
+export async function fetchReviewSummary(storeId) {
+  return client.get(`/api/stores/${storeId}/reviews/summary`)
 }
 
 export async function replyToReview(reviewId, replyContent) {

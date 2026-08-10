@@ -61,7 +61,9 @@ export const useShopStore = create(
         }
       },
 
-      fetchReviews: async (storeId = 1) => {
+      fetchReviews: async () => {
+        const storeId = get().profile.id
+        if (!storeId) return
         set({ reviewsError: '' })
         try {
           const data = await reviewApi.fetchStoreReviews(storeId)
@@ -93,13 +95,12 @@ export const useShopStore = create(
       generateIntro: async (keywords = '') => {
         try {
           const res = await storeApi.generateBio({ keywords })
-          const bioText = res?.bio || res?.description || STORE_INTRO_DRAFT
+          const bioText = res?.generatedBio || res?.bio || res?.description || ''
           set((state) => ({ profile: { ...state.profile, intro: bioText } }))
           return bioText
-        } catch {
-          await randomDelay(800, 1200)
-          set((state) => ({ profile: { ...state.profile, intro: STORE_INTRO_DRAFT } }))
-          return STORE_INTRO_DRAFT
+        } catch (err) {
+          console.error('Failed to generate intro:', err)
+          throw new Error('소개글 자동 생성에 실패했습니다.')
         }
       },
 
@@ -129,18 +130,33 @@ export const useShopStore = create(
         }
       },
 
-      getReviewSummary: () => REVIEW_SUMMARY,
+      getReviewSummary: async () => {
+        const storeId = get().profile.id
+        if (!storeId) return null
+        try {
+          const res = await reviewApi.fetchReviewSummary(storeId)
+          return {
+            averageRating: get().profile.rating || 0,
+            totalCount: res?.totalReviewCount || 0,
+            keywords: res?.positive_points || [],
+            summary: res?.summary || '',
+          }
+        } catch (err) {
+          console.error('Failed to get review summary:', err)
+          return null
+        }
+      },
 
       requestProfileSuggestions: async () => {
         try {
           const res = await storeApi.suggestProfileImprovement()
-          const list = res?.suggestions || PROFILE_SUGGESTIONS
+          const list = res?.suggestions || []
           set({ suggestions: list })
           return list
-        } catch {
-          await randomDelay(700, 1000)
-          set({ suggestions: PROFILE_SUGGESTIONS })
-          return PROFILE_SUGGESTIONS
+        } catch (err) {
+          console.error('Failed to get profile suggestions:', err)
+          set({ suggestions: [] })
+          return []
         }
       },
 
