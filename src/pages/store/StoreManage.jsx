@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Star, Sparkle, TrendUp, IdentificationCard, PencilSimple, Clock } from '@phosphor-icons/react'
+import { PencilSimple, Clock, Sparkle, IdentificationCard, Tag, Star, TrendUp } from '@phosphor-icons/react'
 import { useShopStore } from '../../store/useShopStore'
 import { useAuthStore } from '../../store/useAuthStore'
 import PageHeader from '../../components/ui/PageHeader'
