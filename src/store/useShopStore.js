@@ -148,14 +148,17 @@ export const useShopStore = create(
       },
 
       requestProfileSuggestions: async () => {
+        const { profile } = get()
+        if (!profile?.id) return
+
+        set({ suggestLoading: true, profileError: null })
         try {
-          const res = await storeApi.suggestProfileImprovement()
-          const list = res?.suggestions || []
-          set({ suggestions: list })
-          return list
+          const response = await client.get(`/api/stores/ai/profile-suggest`)
+          set({ suggestions: response.data || [], suggestLoading: false })
+          return response.data || []
         } catch (err) {
           console.error('Failed to get profile suggestions:', err)
-          set({ suggestions: [] })
+          set({ suggestions: [], suggestLoading: false })
           return []
         }
       },
