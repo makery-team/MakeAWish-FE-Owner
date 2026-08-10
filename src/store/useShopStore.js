@@ -42,9 +42,11 @@ export const useShopStore = create(
           set((state) => ({
             profile: {
               ...state.profile,
+              id: data.id,
               storeName: data.name || '',
-              ownerName: currentUser?.name || '',
+              ownerName: currentUser?.realName || currentUser?.name || '',
               category: '미설정', // 백엔드 카테고리가 아직 연동 안됨
+              categories: data.categories || [],
               intro: data.description || '',
               address: data.address || '',
               phone: data.phone || '',
@@ -59,7 +61,9 @@ export const useShopStore = create(
         }
       },
 
-      fetchReviews: async (storeId = 1) => {
+      fetchReviews: async () => {
+        const storeId = get().profile.id
+        if (!storeId) return
         set({ reviewsError: '' })
         try {
           const data = await reviewApi.fetchStoreReviews(storeId)
@@ -79,9 +83,10 @@ export const useShopStore = create(
       },
 
       updateProfile: async (data) => {
-        set((state) => ({ profile: { ...state.profile, ...data }, profileError: '' }))
+        const updatedProfile = { ...get().profile, ...data }
+        set({ profile: updatedProfile, profileError: '' })
         try {
-          await storeApi.updateStoreProfile(data)
+          await storeApi.updateStoreProfile(updatedProfile)
         } catch (err) {
           set({ profileError: err.message || '저장에 실패했어요. 다시 시도해주세요' })
         }
@@ -90,13 +95,12 @@ export const useShopStore = create(
       generateIntro: async (keywords = '') => {
         try {
           const res = await storeApi.generateBio({ keywords })
-          const bioText = res?.bio || res?.description || STORE_INTRO_DRAFT
+          const bioText = res?.generatedBio || res?.bio || res?.description || ''
           set((state) => ({ profile: { ...state.profile, intro: bioText } }))
           return bioText
-        } catch {
-          await randomDelay(800, 1200)
-          set((state) => ({ profile: { ...state.profile, intro: STORE_INTRO_DRAFT } }))
-          return STORE_INTRO_DRAFT
+        } catch (err) {
+          console.error('Failed to generate intro:', err)
+          throw new Error('소개글 자동 생성에 실패했습니다.')
         }
       },
 
@@ -126,18 +130,36 @@ export const useShopStore = create(
         }
       },
 
-      getReviewSummary: () => REVIEW_SUMMARY,
+      getReviewSummary: async () => {
+        const storeId = get().profile.id
+        if (!storeId) return null
+        try {
+          const res = await reviewApi.fetchReviewSummary(storeId)
+          return {
+            averageRating: get().profile.rating || 0,
+            totalCount: res?.totalReviewCount || 0,
+            keywords: res?.positive_points || [],
+            summary: res?.summary || '',
+          }
+        } catch (err) {
+          console.error('Failed to get review summary:', err)
+          return null
+        }
+      },
 
       requestProfileSuggestions: async () => {
+        const { profile } = get()
+        if (!profile?.id) return
+
+        set({ suggestLoading: true, profileError: null })
         try {
-          const res = await storeApi.suggestProfileImprovement()
-          const list = res?.suggestions || PROFILE_SUGGESTIONS
-          set({ suggestions: list })
-          return list
-        } catch {
-          await randomDelay(700, 1000)
-          set({ suggestions: PROFILE_SUGGESTIONS })
-          return PROFILE_SUGGESTIONS
+          const response = await client.get(`/api/stores/ai/profile-suggest`)
+          set({ suggestions: response.data || [], suggestLoading: false })
+          return response.data || []
+        } catch (err) {
+          console.error('Failed to get profile suggestions:', err)
+          set({ suggestions: [], suggestLoading: false })
+          return []
         }
       },
 

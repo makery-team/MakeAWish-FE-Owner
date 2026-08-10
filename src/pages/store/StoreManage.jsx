@@ -29,12 +29,18 @@ export default function StoreManage() {
     replyError,
   } = useShopStore()
 
+  const [summary, setSummary] = useState(null)
+
   useEffect(() => {
     fetchProfile()
     fetchReviews()
   }, [fetchProfile, fetchReviews])
 
-  const summary = getReviewSummary()
+  useEffect(() => {
+    if (profile?.id) {
+      getReviewSummary().then(setSummary)
+    }
+  }, [profile?.id, getReviewSummary])
 
   const [editing, setEditing] = useState(false)
   const [form, setForm] = useState(profile)
@@ -95,7 +101,7 @@ export default function StoreManage() {
               ) : (
                 <p className="font-display text-lg text-cake-ink">{profile.storeName}</p>
               )}
-              <p className="text-xs text-cake-ink-soft">{profile.category} · {profile.ownerName}</p>
+              <p className="text-xs text-cake-ink-soft">{profile.ownerName}</p>
             </div>
             <button
               onClick={() => (editing ? saveProfile() : setEditing(true))}
@@ -128,7 +134,10 @@ export default function StoreManage() {
             </div>
           )}
           {!editing && (
-            <p className="mt-2 text-xs text-cake-ink-soft">{profile.address} · {profile.phone}</p>
+            <p className="mt-2 text-xs text-cake-ink-soft">
+              {profile.address}
+              {profile.phone ? ` · ${profile.phone}` : ''}
+            </p>
           )}
         </Card>
 
@@ -283,13 +292,24 @@ export default function StoreManage() {
         <Card>
           <div className="flex items-center justify-between">
             <p className="flex items-center gap-1.5 text-sm font-bold text-cake-ink"><Star size={16} weight="fill" className="text-cake-yellow-400" /> 리뷰 요약</p>
-            <span className="text-xs font-bold text-cake-pink-500">{summary.averageRating}점 · {summary.totalCount}건</span>
+            {summary && <span className="text-xs font-bold text-cake-pink-500">{summary.averageRating}점 · {summary.totalCount}건</span>}
           </div>
-          <div className="mt-2 flex flex-wrap gap-1.5">
-            {summary.keywords.map((k) => (
-              <span key={k} className="rounded-full bg-cake-mint-100 px-2.5 py-1 text-xs font-medium text-cake-mint-600">{k}</span>
-            ))}
-          </div>
+          {summary ? (
+            <>
+              {summary.summary && (
+                <p className="mt-2 text-xs font-medium text-cake-ink leading-relaxed bg-cake-pink-50 p-2 rounded-lg">
+                  {summary.summary}
+                </p>
+              )}
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {summary.keywords.map((k) => (
+                  <span key={k} className="rounded-full bg-cake-mint-100 px-2.5 py-1 text-xs font-medium text-cake-mint-600">{k}</span>
+                ))}
+              </div>
+            </>
+          ) : (
+            <p className="mt-2 text-xs text-cake-ink-soft">리뷰 요약을 불러오는 중입니다...</p>
+          )}
           {reviewsError && <p className="mt-2 text-xs font-medium text-red-500">{reviewsError}</p>}
           <div className="mt-3 flex flex-col gap-2 divide-y divide-cake-pink-50">
             {reviews.map((r) => (

@@ -38,11 +38,15 @@ export const useAuthStore = create(
           let profile = {}
           try {
             profile = await userApi.getUserProfile()
+            // 디버깅: 백엔드에서 받아온 프로필 값 확인
+            alert('디버깅: 서버에서 받은 역할은 -> ' + profile.userRole)
+
             if (profile.userRole === 'ROLE_SELLER') {
               isOnboarded = true
             }
           } catch (e) {
             console.warn('프로필 조회 실패 (초기 가입자일 수 있음):', e)
+            alert('디버깅: 프로필 조회 실패! ' + e.message)
           }
 
           // 3. Zustand 스토어 상태 갱신
@@ -53,6 +57,7 @@ export const useAuthStore = create(
             onboarded: isOnboarded,
             user: {
               name: profile.nickname || profile.name || res.name || '사장님',
+              realName: profile.name || res.name || '사장님',
               email: profile.email || 'partner@dalkomgongbang.com',
               avatar: 'https://picsum.photos/seed/owner-avatar/200/200',
             },
@@ -106,15 +111,14 @@ export const useAuthStore = create(
             isSeller: true,
           })
 
-          // 2. 주소나 운영시간 정보가 있다면 생성 직후 곧바로 수정 API 호출
-          if (storeData.address || storeData.hours) {
-            const { updateStoreProfile } = await import('../api/storeApi')
-            await updateStoreProfile({
-              storeName: storeData.name,
-              address: storeData.address,
-              businessHours: storeData.hours,
-            })
-          }
+          // 2. 생성 직후 곧바로 수정 API 호출하여 상호명, 연락처, 주소 등 최신화
+          const { updateStoreProfile } = await import('../api/storeApi')
+          await updateStoreProfile({
+            storeName: storeData.name,
+            address: storeData.address,
+            businessHours: storeData.hours,
+            phone: storeData.phone,
+          })
 
           // 3. 프론트엔드 온보딩 완료 상태 저장
           set({ onboarded: true })
