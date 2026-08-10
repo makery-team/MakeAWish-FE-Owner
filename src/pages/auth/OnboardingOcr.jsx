@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { UploadSimple, CheckCircle, IdentificationCard, Storefront, Phone } from '@phosphor-icons/react'
+import { UploadSimple, CheckCircle, IdentificationCard, Storefront, Phone, Tag } from '@phosphor-icons/react'
 import { useAuthStore } from '../../store/useAuthStore'
 import Button from '../../components/ui/Button'
 import Card from '../../components/ui/Card'
@@ -20,6 +20,7 @@ export default function OnboardingOcr() {
   const [phone, setPhone] = useState('')
   const [address, setAddress] = useState('')
   const [detailAddress, setDetailAddress] = useState('')
+  const [keywords, setKeywords] = useState('')
   const [isAddressModalOpen, setIsAddressModalOpen] = useState(false)
   const [hoursForm, setHoursForm] = useState(INITIAL_STORE_PROFILE.businessHours)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -44,7 +45,7 @@ export default function OnboardingOcr() {
     setIsSubmitting(true)
     try {
       const finalAddress = detailAddress ? `${address}, ${detailAddress}` : address
-      await completeOnboarding({ name: storeName, phone, address: finalAddress, hours: hoursForm })
+      await completeOnboarding({ name: storeName, phone, address: finalAddress, hours: hoursForm, keywords })
       navigate('/home')
     } catch (error) {
       alert('매장 개설에 실패했습니다. 다시 시도해주세요.')
@@ -141,6 +142,22 @@ export default function OnboardingOcr() {
                   className="rounded-xl border border-cake-pink-200 px-4 py-3 text-sm outline-none focus:border-cake-pink-400 focus:ring-2 focus:ring-cake-pink-100"
                   required
                 />
+              </label>
+
+              <label className="flex flex-col gap-1.5 mt-2">
+                <span className="text-sm font-semibold text-cake-ink flex items-center gap-1">
+                  <Tag size={16} className="text-cake-pink-500" /> 매장 핵심 키워드 (선택)
+                </span>
+                <input
+                  type="text"
+                  value={keywords}
+                  onChange={(e) => setKeywords(e.target.value)}
+                  placeholder="예: 수제 케이크, 레터링, 귀여운"
+                  className="rounded-xl border border-cake-pink-200 px-4 py-3 text-sm outline-none focus:border-cake-pink-400 focus:ring-2 focus:ring-cake-pink-100"
+                />
+                <span className="text-xs text-cake-ink-soft pl-1">
+                  입력해주시면 AI 소개글 생성 시 더 자연스럽게 반영됩니다.
+                </span>
               </label>
 
               <div className="flex flex-col gap-1.5 mt-2">

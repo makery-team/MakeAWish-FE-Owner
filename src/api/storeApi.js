@@ -34,6 +34,7 @@ export async function updateStoreProfile(data) {
   if (data.phone !== undefined) payload.phone = data.phone
   if (data.notice !== undefined) payload.notice = data.notice
   if (data.cautionNotice !== undefined) payload.cautionNotice = data.cautionNotice
+  if (data.keywords !== undefined) payload.keywords = data.keywords
 
   return client.patch('/api/stores/profile', payload)
 }

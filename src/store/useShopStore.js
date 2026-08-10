@@ -52,6 +52,7 @@ export const useShopStore = create(
               phone: data.phone || '',
               notice: data.notice || '',
               cautionNotice: data.cautionNotice || '',
+              keywords: data.keywords || '',
               businessHours: parsedHours,
             },
           }))
@@ -104,9 +105,10 @@ export const useShopStore = create(
         }
       },
 
-      generateIntro: async (keywords = '') => {
+      generateIntro: async () => {
         try {
-          const res = await storeApi.generateBio({ keywords })
+          const { profile } = get()
+          const res = await storeApi.generateBio({ keywords: profile.keywords || '' })
           const bioText = res?.generatedBio || res?.bio || res?.description || ''
           set((state) => ({ profile: { ...state.profile, intro: bioText } }))
           return bioText
