@@ -58,6 +58,18 @@ export const useShopStore = create(
         } catch (err) {
           // 조회 실패 시 (예: 매장이 아직 없는 경우) 에러 메시지를 남깁니다.
           set({ profileError: err.message || '매장 정보를 불러오지 못했어요' })
+          
+          if (err.status === 404 || err.status === 400) {
+            console.warn('매장 정보를 찾을 수 없어 상태를 초기화하고 로그인으로 이동합니다.')
+            alert('매장 정보를 찾을 수 없습니다. (DB 초기화 등) 다시 로그인해주세요.')
+            
+            set((state) => ({ profile: { ...state.profile, id: null } }))
+            
+            import('./useAuthStore').then(({ useAuthStore }) => {
+              useAuthStore.getState().logout()
+              window.location.href = '/login'
+            })
+          }
         }
       },
 
