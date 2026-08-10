@@ -39,9 +39,9 @@ export async function updateStoreProfile(data) {
 }
 
 export async function suggestProfileImprovement() {
-  return client.get('/api/profile-suggest')
+  return client.get('/api/stores/ai/profile-suggest')
 }
 
 export async function generateBio(payload = {}) {
-  return client.post('/api/generate-bio', payload)
+  return client.post('/api/stores/ai/generate-bio', payload)
 }
