@@ -229,12 +229,43 @@ export default function StoreManage() {
           </div>
           {editing ? (
             <div className="mt-2 flex flex-col gap-2">
-              <input
-                value={form.keywords}
-                onChange={(e) => setForm((f) => ({ ...f, keywords: e.target.value }))}
-                placeholder="예: 수제 케이크, 레터링, 동물 그림"
-                className="w-full rounded-xl border border-cake-pink-200 px-3 py-2 text-sm outline-none focus:border-cake-pink-400"
-              />
+              <div className="flex flex-col gap-2">
+                <div className="flex flex-wrap gap-2">
+                  {form.keywords.split(',').map((kw, i) => kw.trim() ? (
+                    <span key={i} className="flex items-center gap-1 rounded-full bg-cake-pink-100 px-3 py-1 text-xs font-semibold text-cake-pink-600">
+                      #{kw.trim()}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newKw = form.keywords.split(',').map(k => k.trim()).filter((_, idx) => idx !== i).join(', ')
+                          setForm(f => ({ ...f, keywords: newKw }))
+                        }}
+                        className="ml-1 text-cake-pink-400 hover:text-cake-pink-600"
+                      >
+                        &times;
+                      </button>
+                    </span>
+                  ) : null)}
+                </div>
+                <input
+                  type="text"
+                  placeholder="입력 후 엔터(Enter)나 쉼표(,)를 눌러주세요"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ',') {
+                      e.preventDefault()
+                      const val = e.target.value.trim()
+                      if (val) {
+                        const currentList = form.keywords.split(',').map(k => k.trim()).filter(Boolean)
+                        if (!currentList.includes(val)) {
+                          setForm(f => ({ ...f, keywords: currentList.length > 0 ? `${f.keywords}, ${val}` : val }))
+                        }
+                        e.target.value = ''
+                      }
+                    }
+                  }}
+                  className="w-full rounded-xl border border-cake-pink-200 px-3 py-2 text-sm outline-none focus:border-cake-pink-400"
+                />
+              </div>
               <span className="text-xs text-cake-ink-soft">입력 후 위 프로필 카드의 저장하기 버튼을 누르거나 여기서 바로 저장하세요.</span>
               <Button loading={savingProfile} onClick={saveProfile} className="w-full">저장하기</Button>
             </div>

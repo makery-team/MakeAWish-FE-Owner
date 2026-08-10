@@ -150,16 +150,46 @@ export default function OnboardingOcr() {
                 <span className="text-sm font-semibold text-cake-ink flex items-center gap-1">
                   <Tag size={16} className="text-cake-pink-500" /> 매장 핵심 키워드 (선택)
                 </span>
-                <input
-                  type="text"
-                  value={keywords}
-                  onChange={(e) => setKeywords(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault() }}
-                  placeholder="예: 수제 케이크, 레터링, 귀여운"
-                  className="rounded-xl border border-cake-pink-200 px-4 py-3 text-sm outline-none focus:border-cake-pink-400 focus:ring-2 focus:ring-cake-pink-100"
-                />
+                <div className="flex flex-col gap-2">
+                  <div className="flex flex-wrap gap-2">
+                    {keywords.split(',').map((kw, i) => kw.trim() ? (
+                      <span key={i} className="flex items-center gap-1 rounded-full bg-cake-pink-100 px-3 py-1 text-xs font-semibold text-cake-pink-600">
+                        #{kw.trim()}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newKw = keywords.split(',').map(k => k.trim()).filter((_, idx) => idx !== i).join(', ')
+                            setKeywords(newKw)
+                          }}
+                          className="ml-1 text-cake-pink-400 hover:text-cake-pink-600"
+                        >
+                          &times;
+                        </button>
+                      </span>
+                    ) : null)}
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="입력 후 엔터(Enter)나 쉼표(,)를 눌러주세요"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ',') {
+                        e.preventDefault()
+                        const val = e.target.value.trim()
+                        if (val) {
+                          // 중복 방지 및 추가
+                          const currentList = keywords.split(',').map(k => k.trim()).filter(Boolean)
+                          if (!currentList.includes(val)) {
+                            setKeywords(currentList.length > 0 ? `${keywords}, ${val}` : val)
+                          }
+                          e.target.value = ''
+                        }
+                      }
+                    }}
+                    className="rounded-xl border border-cake-pink-200 px-4 py-3 text-sm outline-none focus:border-cake-pink-400 focus:ring-2 focus:ring-cake-pink-100"
+                  />
+                </div>
                 <span className="text-xs text-cake-ink-soft pl-1">
-                  입력해주시면 AI 소개글 생성 시 더 자연스럽게 반영됩니다.
+                  입력해주시면 AI 소개글 생성 시 더 자연스럽게 반영됩니다. (예: 수제 케이크, 귀여운)
                 </span>
               </label>
 
