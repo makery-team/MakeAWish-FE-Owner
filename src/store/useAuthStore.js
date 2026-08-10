@@ -72,6 +72,7 @@ export const useAuthStore = create(
       logout: () => {
         localStorage.removeItem('auth_token')
         localStorage.removeItem('refresh_token')
+        localStorage.removeItem('cake-shop') // 이전 매장 정보 캐시 삭제
         set({
           isLoggedIn: false,
           token: null,
@@ -120,7 +121,11 @@ export const useAuthStore = create(
             phone: storeData.phone,
           })
 
-          // 3. 프론트엔드 온보딩 완료 상태 저장
+          // 3. Zustand 매장 스토어 강제 갱신 (캐시된 옛날 이름 방지)
+          const { useShopStore } = await import('./useShopStore')
+          await useShopStore.getState().fetchProfile()
+
+          // 4. 프론트엔드 온보딩 완료 상태 저장
           set({ onboarded: true })
         } catch (error) {
           console.error('매장 개설 실패:', error)
