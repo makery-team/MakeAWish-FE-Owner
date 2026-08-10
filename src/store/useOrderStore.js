@@ -12,6 +12,7 @@ import {
   updateOrderStatus as apiUpdateOrderStatus,
   registerExtraFee as apiRegisterExtraFee,
   isMockOrderId,
+  fetchOrders,
 } from '../api/orderApi'
 
 export const useOrderStore = create(
@@ -23,12 +24,34 @@ export const useOrderStore = create(
       messageDrafts: {}, // orderId -> string
       schemaFields: ORDER_SCHEMA_FIELDS,
 
-      getTodayOrders: () => get().orders.filter((o) => o.requestedDate === todayIso()),
-      getTodayBriefing: () => TODAY_BRIEFING,
+      todayOrders: [],
+      getTodayBriefing: () => {
+        const orders = get().todayOrders || []
+        const pendingCount = orders.filter(o => o.status === 'PENDING').length
+        const inProgressCount = orders.filter(o => o.status === 'IN_PROGRESS' || o.status === 'ACCEPTED' || o.status === 'PICKUP_READY').length
+        const expectedRevenue = orders.reduce((sum, o) => sum + (o.totalPrice || o.price || 0), 0)
+        return {
+          summary: orders.length === 0 
+            ? '오늘은 아직 들어온 주문이 없어요.' 
+            : `오늘은 주문 ${orders.length}건이 접수되어 있어요. ${pendingCount > 0 ? `그 중 ${pendingCount}건은 아직 수락 대기중이니 먼저 확인해주세요!` : '모두 확인 완료했어요!'}`,
+          pendingCount,
+          inProgressCount,
+          expectedRevenue,
+        }
+      },
       getOrderById: (orderId) => get().orders.find((o) => o.id === orderId),
       getExtraChargesByOrder: (orderId) => get().extraCharges.filter((c) => c.orderId === orderId),
       getPaymentByOrder: (orderId) => get().payments.find((p) => p.orderId === orderId),
-      resetOrders: () => set({ orders: INITIAL_ORDERS }),
+      resetOrders: () => set({ orders: INITIAL_ORDERS, todayOrders: [] }),
+
+      fetchTodayOrders: async () => {
+        try {
+          const res = await fetchOrders({ date: 'today' })
+          set({ todayOrders: Array.isArray(res) ? res : (res?.data || []) })
+        } catch (error) {
+          console.error('[useOrderStore] 오늘의 주문 조회 실패:', error.message)
+        }
+      },
 
       updateOrderStatus: async (orderId, status, reason) => {
         if (!isMockOrderId(orderId)) {

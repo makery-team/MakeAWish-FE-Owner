@@ -11,14 +11,14 @@ import EmptyState from '../../components/ui/EmptyState'
 export default function Home() {
   const navigate = useNavigate()
   const { profile, fetchProfile } = useShopStore()
-  const { getTodayOrders, getTodayBriefing } = useOrderStore()
-  const todayOrders = getTodayOrders()
+  const { todayOrders, fetchTodayOrders, getTodayBriefing } = useOrderStore()
   const briefing = getTodayBriefing()
 
-  // 홈 화면 진입 시 서버에서 최신 매장 프로필 조회
+  // 홈 화면 진입 시 서버에서 최신 데이터 조회
   useEffect(() => {
     fetchProfile()
-  }, [fetchProfile])
+    fetchTodayOrders()
+  }, [fetchProfile, fetchTodayOrders])
 
   return (
     <div className="px-5 pt-6">

@@ -130,21 +130,12 @@ export default function StoreManage() {
                 placeholder="연락처"
                 className="rounded-xl border border-cake-pink-200 px-3 py-2 text-sm outline-none"
               />
-              <input
-                value={form.keywords}
-                onChange={(e) => setForm((f) => ({ ...f, keywords: e.target.value }))}
-                placeholder="매장 핵심 키워드 (예: 수제 케이크, 레터링)"
-                className="rounded-xl border border-cake-pink-200 px-3 py-2 text-sm outline-none"
-              />
               <Button loading={savingProfile} onClick={saveProfile} className="mt-1 w-full">저장하기</Button>
             </div>
           )}
           {!editing && (
             <p className="mt-2 text-xs text-cake-ink-soft flex flex-col gap-1">
               <span>{profile.address}{profile.phone ? ` · ${profile.phone}` : ''}</span>
-              {profile.keywords && (
-                <span className="font-semibold text-cake-pink-500">#{profile.keywords.split(',').map(k => k.trim()).join(' #')}</span>
-              )}
             </p>
           )}
         </Card>
@@ -215,6 +206,45 @@ export default function StoreManage() {
                 </div>
               ))}
               <Button loading={savingHours} onClick={saveHours} className="mt-1 w-full">저장하기</Button>
+            </div>
+          )}
+        </Card>
+
+        <Card>
+          <div className="flex items-center justify-between">
+            <p className="flex items-center gap-1.5 text-sm font-bold text-cake-ink"><Tag size={16} className="text-cake-pink-500" /> 매장 핵심 키워드</p>
+            <button
+              onClick={() => {
+                if (editing) {
+                  saveProfile()
+                } else {
+                  setForm({ address: profile.address, phone: profile.phone, keywords: profile.keywords || '' })
+                  setEditing(true)
+                }
+              }}
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-cake-pink-50 text-cake-pink-500 active:scale-95"
+            >
+              <PencilSimple size={15} />
+            </button>
+          </div>
+          {editing ? (
+            <div className="mt-2 flex flex-col gap-2">
+              <input
+                value={form.keywords}
+                onChange={(e) => setForm((f) => ({ ...f, keywords: e.target.value }))}
+                placeholder="예: 수제 케이크, 레터링, 동물 그림"
+                className="w-full rounded-xl border border-cake-pink-200 px-3 py-2 text-sm outline-none focus:border-cake-pink-400"
+              />
+              <span className="text-xs text-cake-ink-soft">입력 후 위 프로필 카드의 저장하기 버튼을 누르거나 여기서 바로 저장하세요.</span>
+              <Button loading={savingProfile} onClick={saveProfile} className="w-full">저장하기</Button>
+            </div>
+          ) : (
+            <div className="mt-2 text-sm text-cake-ink-soft">
+              {profile.keywords ? (
+                <span className="font-semibold text-cake-pink-500">#{profile.keywords.split(',').map(k => k.trim()).join(' #')}</span>
+              ) : (
+                '등록된 키워드가 없어요. (소개글 자동 생성 시 활용됩니다)'
+              )}
             </div>
           )}
         </Card>
@@ -434,32 +464,38 @@ export default function StoreManage() {
           )}
         </Card>
 
-        {/* 계정 및 온보딩 테스트 설정 카드 */}
+        {/* 계정 관리 카드 */}
         <Card>
-          <p className="text-sm font-bold text-cake-ink">계정 및 온보딩 테스트 설정</p>
-          <p className="mt-1 text-xs text-cake-ink-soft">
-            테스트 중 온보딩(OCR 사업자등록증 인증) 화면을 처음부터 다시 체험할 수 있습니다.
-          </p>
+          <p className="text-sm font-bold text-cake-ink">계정 관리</p>
           <div className="mt-3 flex gap-2">
             <Button
               variant="secondary"
               className="flex-1 text-xs"
-              onClick={() => {
-                useAuthStore.getState().resetOnboarding()
-                alert('온보딩 상태가 초기화되었습니다! 로그아웃 후 다시 로그인하면 온보딩(OCR 인증) 화면으로 이동합니다.')
-              }}
-            >
-              🔄 온보딩 상태 초기화
-            </Button>
-            <Button
-              variant="secondary"
-              className="flex-1 text-xs text-red-500 hover:bg-red-50 hover:text-red-600"
               onClick={() => {
                 useAuthStore.getState().logout()
                 window.location.href = '/login'
               }}
             >
               🚪 로그아웃
+            </Button>
+            <Button
+              variant="secondary"
+              className="flex-1 text-xs text-red-500 hover:bg-red-50 hover:text-red-600"
+              onClick={async () => {
+                if (window.confirm('정말 계정을 탈퇴하시겠습니까? (이 작업은 되돌릴 수 없습니다)')) {
+                  try {
+                    const { client } = await import('../../api/client')
+                    await client.delete('/api/users/me')
+                    alert('계정이 성공적으로 삭제되었습니다.')
+                    useAuthStore.getState().logout()
+                    window.location.href = '/login'
+                  } catch (e) {
+                    alert('계정 삭제에 실패했습니다.')
+                  }
+                }
+              }}
+            >
+              ⚠️ 계정 탈퇴
             </Button>
           </div>
         </Card>
