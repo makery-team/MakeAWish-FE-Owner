@@ -12,7 +12,7 @@ export async function uploadPortfolioImage(file) {
   return res.imageUrl
 }
 
-export async function createPortfolio({ title, description, imageUrl, isInpaintingAllowed, tags }) {
+export async function createPortfolio({ title, description, imageUrl, tags }) {
   // zustand store에서 현재 매장의 카테고리(Product) 목록을 가져와 첫 번째 카테고리에 연결합니다.
   let productId = 1
   try {
@@ -25,11 +25,11 @@ export async function createPortfolio({ title, description, imageUrl, isInpainti
     console.error('Failed to get productId from shop store, defaulting to 1', e)
   }
 
-  return client.post('/api/portfolios', { title, description, imageUrl, isInpaintingAllowed, productId, tags })
+  return client.post('/api/portfolios', { title, description, imageUrl, productId, tags })
 }
 
-export async function updatePortfolio(portfolioId, { title, description, imageUrl, isInpaintingAllowed, tags }) {
-  return client.patch(`/api/portfolios/${portfolioId}`, { title, description, imageUrl, isInpaintingAllowed, tags })
+export async function updatePortfolio(portfolioId, { title, description, imageUrl, tags }) {
+  return client.patch(`/api/portfolios/${portfolioId}`, { title, description, imageUrl, tags })
 }
 
 export async function recommendPortfolioTags({ imageUrl, description }) {
