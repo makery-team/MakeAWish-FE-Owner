@@ -60,9 +60,15 @@ export const useShopStore = create(
           set({ profileError: err.message || '매장 정보를 불러오지 못했어요' })
           
           if (err.status === 404 || err.status === 400) {
-            console.warn('매장 정보를 찾을 수 없어 상태를 초기화하고 온보딩으로 이동합니다.')
+            console.warn('매장 정보를 찾을 수 없어 상태를 초기화하고 로그인으로 이동합니다.')
+            alert('매장 정보를 찾을 수 없습니다. (DB 초기화 등) 다시 로그인해주세요.')
+            
             set((state) => ({ profile: { ...state.profile, id: null } }))
-            window.location.href = '/onboarding'
+            
+            import('./useAuthStore').then(({ useAuthStore }) => {
+              useAuthStore.getState().logout()
+              window.location.href = '/login'
+            })
           }
         }
       },
