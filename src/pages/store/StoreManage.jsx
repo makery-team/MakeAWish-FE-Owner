@@ -430,39 +430,6 @@ export default function StoreManage() {
           )}
         </Card>
 
-        <Card>
-          <p className="flex items-center gap-1.5 text-sm font-bold text-cake-ink"><TrendUp size={16} className="text-cake-pink-500" /> 시장 가격 분석</p>
-          {priceLoading && <Spinner label="주변 시세를 분석하고 있어요…" />}
-          {!priceLoading && priceAnalysis && (
-            <div className="mt-2 flex flex-col gap-2">
-              <p className="text-xs text-cake-ink-soft">
-                내 평균가 <span className="font-bold text-cake-pink-600">{priceAnalysis.myAvgPrice.toLocaleString()}원</span> · 시장 평균가{' '}
-                {priceAnalysis.marketAvgPrice.toLocaleString()}원
-              </p>
-              {priceAnalysis.comparisonByCategory.map((c) => (
-                <div key={c.category} className="flex items-center justify-between text-xs">
-                  <span className="text-cake-ink-soft">{c.category}</span>
-                  <span className="text-cake-ink">
-                    <span className="font-bold text-cake-pink-600">{c.my.toLocaleString()}</span> / {c.market.toLocaleString()}원
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-          {!priceLoading && (
-            <Button
-              variant="secondary"
-              className="mt-3 w-full"
-              onClick={async () => {
-                setPriceLoading(true)
-                await fetchPriceAnalysis()
-                setPriceLoading(false)
-              }}
-            >
-              {priceAnalysis ? '다시 조회하기' : '시장 가격 조회'}
-            </Button>
-          )}
-        </Card>
 
         {/* 계정 관리 카드 */}
         <Card>
