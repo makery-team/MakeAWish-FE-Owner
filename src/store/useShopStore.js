@@ -113,7 +113,7 @@ export const useShopStore = create(
           
           // 생성된 텍스트를 로컬 상태에 반영하고 바로 서버에 저장
           set((state) => ({ profile: { ...state.profile, intro: bioText } }))
-          await get().updateStoreProfile({ intro: bioText })
+          await get().updateProfile({ intro: bioText })
           
           return bioText
         } catch (err) {
