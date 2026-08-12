@@ -1,11 +1,10 @@
 import { addDaysIso } from '../lib/time'
 
 export const ORDER_SCHEMA_FIELDS = [
-  { id: 'size', label: '케이크 사이즈', type: 'select', options: ['미니(2호)', '기본(3호)', '빅(5호)'] },
-  { id: 'pickupDate', label: '픽업 희망 날짜', type: 'date' },
-  { id: 'lettering', label: '레터링 문구', type: 'text' },
-  { id: 'refImage', label: '참고 이미지', type: 'image' },
-  { id: 'request', label: '알러지 / 요청사항', type: 'textarea' },
+  { id: 'size', label: '케이크 사이즈' },
+  { id: 'pickupDate', label: '픽업 희망 날짜' },
+  { id: 'lettering', label: '레터링 문구' },
+  { id: 'request', label: '알러지 / 요청사항' },
 ]
 
 export const INITIAL_ORDERS = [
