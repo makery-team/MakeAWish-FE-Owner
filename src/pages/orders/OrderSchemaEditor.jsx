@@ -1,11 +1,9 @@
 import { useState } from 'react'
-import { Trash, Plus } from '@phosphor-icons/react'
+import { Trash, Plus, DotsSixVertical } from '@phosphor-icons/react'
 import { useOrderStore } from '../../store/useOrderStore'
 import PageHeader from '../../components/ui/PageHeader'
 import Card from '../../components/ui/Card'
 import Button from '../../components/ui/Button'
-
-const TYPE_LABEL = { text: '텍스트', select: '선택형', date: '날짜', image: '이미지', textarea: '장문 텍스트' }
 
 export default function OrderSchemaEditor() {
   const { schemaFields, updateSchemaFields } = useOrderStore()
@@ -13,39 +11,67 @@ export default function OrderSchemaEditor() {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
 
-  const updateField = (id, label) => {
+  const updateLabel = (id, label) => {
     setFields((prev) => prev.map((f) => (f.id === id ? { ...f, label } : f)))
   }
 
   const removeField = (id) => setFields((prev) => prev.filter((f) => f.id !== id))
 
   const addField = () => {
-    setFields((prev) => [...prev, { id: `custom_${prev.length}_${Date.now()}`, label: '새 항목', type: 'text' }])
+    setFields((prev) => [
+      ...prev,
+      { id: `field_${Date.now()}`, label: '' },
+    ])
   }
 
   const handleSave = async () => {
+    const validFields = fields.filter((f) => f.label.trim() !== '')
+    if (validFields.length === 0) return
+
     setSaving(true)
-    await updateSchemaFields(fields)
+    await updateSchemaFields(validFields)
+    setFields(validFields)
     setSaving(false)
     setSaved(true)
     setTimeout(() => setSaved(false), 1500)
   }
 
+  const isEmpty = fields.length === 0
+
   return (
     <div className="pb-6">
-      <PageHeader title="주문서 양식 설정" subtitle="고객이 작성할 주문서 항목을 편집해요" back />
+      <PageHeader title="주문서 양식 설정" subtitle="AI 점원이 고객에게 물어볼 항목을 설정해요" back />
 
       <div className="flex flex-col gap-3 px-5">
-        {fields.map((f) => (
+        <div className="mb-2 rounded-2xl bg-cake-pink-50 p-4 text-[13px] leading-relaxed text-cake-pink-700">
+          <p className="mb-1 font-bold text-cake-pink-600">💡 팁</p>
+          <p>항목 이름과 함께 <b>옵션(예: 1호, 2호)</b>이나 <b>제약사항(예: 20자 이내)</b>을 자유롭게 입력해주세요. 입력하신 내용은 AI 점원의 고객 응대 가이드로 활용됩니다.</p>
+        </div>
+        {isEmpty && (
+          <div className="flex flex-col items-center gap-2 py-10 text-center text-cake-ink-soft">
+            <p className="text-sm">아직 등록된 항목이 없어요</p>
+            <p className="text-xs text-cake-ink-muted">아래 버튼을 눌러 항목을 추가해 보세요</p>
+          </div>
+        )}
+
+        {fields.map((f, index) => (
           <Card key={f.id} className="flex items-center gap-3">
+            <DotsSixVertical size={18} className="shrink-0 text-cake-ink-muted" />
             <div className="flex-1">
-              <input
+              <textarea
                 value={f.label}
-                onChange={(e) => updateField(f.id, e.target.value)}
-                className="w-full border-b border-transparent bg-transparent text-sm font-semibold text-cake-ink outline-none focus:border-cake-pink-300"
+                onChange={(e) => updateLabel(f.id, e.target.value)}
+                onInput={(e) => {
+                  e.target.style.height = 'auto'
+                  e.target.style.height = e.target.scrollHeight + 'px'
+                }}
+                rows={1}
+                placeholder="예: 케이크 사이즈 (1호, 2호, 미니)"
+                className="w-full resize-none overflow-hidden border-b border-transparent bg-transparent py-1 text-sm font-semibold text-cake-ink outline-none placeholder:text-cake-ink-muted focus:border-cake-pink-300"
+                autoFocus={f.label === ''}
               />
-              <span className="mt-1 inline-block rounded-full bg-cake-pink-50 px-2 py-0.5 text-[10px] font-medium text-cake-pink-500">
-                {TYPE_LABEL[f.type] || f.type}
+              <span className="mt-1 inline-block text-[10px] text-cake-ink-muted">
+                {index + 1}번째 질문
               </span>
             </div>
             <button onClick={() => removeField(f.id)} className="text-cake-ink-soft active:text-red-400" aria-label="삭제">

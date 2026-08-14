@@ -14,6 +14,8 @@ import {
   isMockOrderId,
   fetchOrders,
 } from '../api/orderApi'
+import { updateOrderSchema as apiUpdateOrderSchema } from '../api/storeApi'
+import { useShopStore } from './useShopStore'
 
 export const useOrderStore = create(
   persist(
@@ -124,8 +126,29 @@ export const useOrderStore = create(
       },
 
       updateSchemaFields: async (fields) => {
-        await randomDelay()
+        // 1. 상태 업데이트
         set({ schemaFields: fields })
+
+        // 2. 백엔드가 요구하는 JSON Schema 형태로 변환
+        const properties = {}
+        fields.forEach((f) => {
+          properties[f.id] = { type: 'string', label: f.label }
+        })
+        const orderSchema = { type: 'object', properties }
+
+        // 3. storeId를 가져와 API 호출
+        try {
+          const storeId = useShopStore.getState().profile?.id
+          if (!storeId) {
+            console.warn('storeId가 없어 스키마 저장을 생략합니다.')
+            return
+          }
+          // productId는 임시로 1 할당 (현재 플랫폼은 매장당 주력 상품 1개로 가정)
+          await apiUpdateOrderSchema(storeId, { productId: 1, orderSchema })
+        } catch (error) {
+          console.error('주문서 양식 저장 실패:', error)
+          // 실패 시 알림 띄우기 등의 처리 필요
+        }
       },
     }),
     {
