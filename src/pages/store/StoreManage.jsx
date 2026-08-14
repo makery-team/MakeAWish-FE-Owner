@@ -461,6 +461,18 @@ export default function StoreManage() {
           )}
         </Card>
 
+        {/* 메뉴 관리 카드 */}
+        <Card>
+          <div className="flex items-center justify-between">
+            <p className="flex items-center gap-1.5 text-sm font-bold text-cake-ink">메뉴(카테고리) 관리</p>
+            <Button variant="secondary" className="px-3 py-1 text-xs" onClick={() => navigate('/store/menus')}>
+              관리하기
+            </Button>
+          </div>
+          <p className="mt-2 text-xs text-cake-ink-soft">
+            포트폴리오와 주문서를 분류할 메뉴(도시락 케이크, 입체 케이크 등)를 설정합니다.
+          </p>
+        </Card>
 
         {/* 계정 관리 카드 */}
         <Card>

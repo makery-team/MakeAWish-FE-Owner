@@ -125,7 +125,7 @@ export const useOrderStore = create(
         return draft
       },
 
-      updateSchemaFields: async (fields) => {
+      updateSchemaFields: async (productId, fields) => {
         // 1. 상태 업데이트
         set({ schemaFields: fields })
 
@@ -143,8 +143,7 @@ export const useOrderStore = create(
             console.warn('storeId가 없어 스키마 저장을 생략합니다.')
             return
           }
-          // productId는 임시로 1 할당 (현재 플랫폼은 매장당 주력 상품 1개로 가정)
-          await apiUpdateOrderSchema(storeId, { productId: 1, orderSchema })
+          await apiUpdateOrderSchema(storeId, { productId, orderSchema })
         } catch (error) {
           console.error('주문서 양식 저장 실패:', error)
           // 실패 시 알림 띄우기 등의 처리 필요

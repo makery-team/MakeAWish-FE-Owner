@@ -12,6 +12,7 @@ import OrderSchemaEditor from './pages/orders/OrderSchemaEditor'
 import PortfolioList from './pages/portfolio/PortfolioList'
 import PortfolioForm from './pages/portfolio/PortfolioForm'
 import StoreManage from './pages/store/StoreManage'
+import MenuManager from './pages/store/MenuManager'
 import Stats from './pages/stats/Stats'
 import ChatManage from './pages/chat/ChatManage'
 
@@ -45,6 +46,7 @@ export default function App() {
           <Route path="/portfolio/new" element={<PortfolioForm />} />
           <Route path="/portfolio/:portfolioId/edit" element={<PortfolioForm />} />
           <Route path="/store" element={<StoreManage />} />
+          <Route path="/store/menus" element={<MenuManager />} />
           <Route path="/stats" element={<Stats />} />
           <Route path="/chat" element={<ChatManage />} />
         </Route>
