@@ -43,6 +43,10 @@ export default function OrderSchemaEditor() {
       <PageHeader title="주문서 양식 설정" subtitle="AI 점원이 고객에게 물어볼 항목을 설정해요" back />
 
       <div className="flex flex-col gap-3 px-5">
+        <div className="mb-2 rounded-2xl bg-cake-pink-50 p-4 text-[13px] leading-relaxed text-cake-pink-700">
+          <p className="mb-1 font-bold text-cake-pink-600">💡 팁</p>
+          <p>항목 이름과 함께 <b>옵션(예: 1호, 2호)</b>이나 <b>제약사항(예: 20자 이내)</b>을 자유롭게 입력해주세요. 입력하신 내용은 AI 점원의 고객 응대 가이드로 활용됩니다.</p>
+        </div>
         {isEmpty && (
           <div className="flex flex-col items-center gap-2 py-10 text-center text-cake-ink-soft">
             <p className="text-sm">아직 등록된 항목이 없어요</p>
@@ -54,11 +58,16 @@ export default function OrderSchemaEditor() {
           <Card key={f.id} className="flex items-center gap-3">
             <DotsSixVertical size={18} className="shrink-0 text-cake-ink-muted" />
             <div className="flex-1">
-              <input
+              <textarea
                 value={f.label}
                 onChange={(e) => updateLabel(f.id, e.target.value)}
-                placeholder="항목 이름을 입력하세요"
-                className="w-full border-b border-transparent bg-transparent text-sm font-semibold text-cake-ink outline-none placeholder:text-cake-ink-muted focus:border-cake-pink-300"
+                onInput={(e) => {
+                  e.target.style.height = 'auto'
+                  e.target.style.height = e.target.scrollHeight + 'px'
+                }}
+                rows={1}
+                placeholder="예: 케이크 사이즈 (1호, 2호, 미니)"
+                className="w-full resize-none overflow-hidden border-b border-transparent bg-transparent py-1 text-sm font-semibold text-cake-ink outline-none placeholder:text-cake-ink-muted focus:border-cake-pink-300"
                 autoFocus={f.label === ''}
               />
               <span className="mt-1 inline-block text-[10px] text-cake-ink-muted">
