@@ -143,8 +143,8 @@ export const useOrderStore = create(
             console.warn('storeId가 없어 스키마 저장을 생략합니다.')
             return
           }
-          // productId는 임시로 1 할당 (현재 플랫폼은 매장당 주력 상품 1개로 가정)
-          await apiUpdateOrderSchema(storeId, { productId: 1, orderSchema })
+          // productId를 생략하면 백엔드에서 매장의 기본/첫번째 상품으로 자동 할당함
+          await apiUpdateOrderSchema(storeId, { orderSchema })
         } catch (error) {
           console.error('주문서 양식 저장 실패:', error)
           // 실패 시 알림 띄우기 등의 처리 필요
