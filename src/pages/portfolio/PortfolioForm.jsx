@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Sparkle, X, Plus } from '@phosphor-icons/react'
 import { usePortfolioStore } from '../../store/usePortfolioStore'
+import { useShopStore } from '../../store/useShopStore'
 import { uploadPortfolioImage } from '../../api/portfolioApi'
 import PageHeader from '../../components/ui/PageHeader'
 import Card from '../../components/ui/Card'
@@ -11,8 +12,10 @@ export default function PortfolioForm() {
   const { portfolioId } = useParams()
   const navigate = useNavigate()
   const { getById, createPortfolio, updatePortfolio, recommendTags } = usePortfolioStore()
+  const { profile } = useShopStore()
   const existing = portfolioId ? getById(portfolioId) : null
 
+  const [productId, setProductId] = useState(existing?.productId || (profile?.categories?.length > 0 ? profile.categories[0].id : null))
   const [title, setTitle] = useState(existing?.title || '')
   const [description, setDescription] = useState(existing?.description || '')
   const [tags, setTags] = useState(existing?.tags || [])
@@ -69,7 +72,7 @@ export default function PortfolioForm() {
     setSaving(true)
     setSaveError('')
     try {
-      const payload = { title, description, imageUrl, tags }
+      const payload = { productId, title, description, imageUrl, tags }
       if (existing) await updatePortfolio(existing.id, payload)
       else await createPortfolio(payload)
       navigate('/portfolio')
@@ -101,7 +104,18 @@ export default function PortfolioForm() {
         {uploadError && <p className="text-center text-xs font-medium text-red-500">{uploadError}</p>}
 
         <Card>
-          <label className="text-xs font-semibold text-cake-ink-soft">작품 제목</label>
+          <label className="text-xs font-semibold text-cake-ink-soft">메뉴(카테고리)</label>
+          <select
+            value={productId || ''}
+            onChange={(e) => setProductId(Number(e.target.value))}
+            className="mt-1 w-full rounded-xl border border-cake-pink-200 bg-white px-3 py-2 text-sm outline-none focus:border-cake-pink-400"
+          >
+            <option value="" disabled>메뉴를 선택해주세요</option>
+            {profile?.categories?.map(c => (
+              <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
+          </select>
+          <label className="mt-3 block text-xs font-semibold text-cake-ink-soft">작품 제목</label>
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
@@ -168,7 +182,7 @@ export default function PortfolioForm() {
         </Card>
 
         {saveError && <p className="text-center text-xs font-medium text-red-500">{saveError}</p>}
-        <Button className="w-full" loading={saving} disabled={!title || !imageUrl || uploadingImage} onClick={handleSave}>
+        <Button className="w-full" loading={saving} disabled={!productId || !title || !imageUrl || uploadingImage} onClick={handleSave}>
           {existing ? '수정 완료' : '등록하기'}
         </Button>
       </div>
