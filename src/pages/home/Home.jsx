@@ -74,8 +74,13 @@ export default function Home() {
             className="flex cursor-pointer items-center justify-between active:scale-[0.98]"
           >
             <div>
-              <p className="font-semibold text-cake-ink">{order.customerName} · {order.cakeType}</p>
-              <p className="mt-0.5 text-xs text-cake-ink-soft">픽업 {order.pickupTime} · {order.price.toLocaleString()}원</p>
+              <p className="font-semibold text-cake-ink">
+                {order.customerName || `주문 ${order.orderNumber || order.id}`} 
+                {order.cakeType ? ` · ${order.cakeType}` : ''}
+              </p>
+              <p className="mt-0.5 text-xs text-cake-ink-soft">
+                픽업 {order.pickupTime || new Date(order.pickupDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} · {(order.price || order.totalPrice || 0).toLocaleString()}원
+              </p>
             </div>
             <StatusBadge status={order.status} />
           </Card>
