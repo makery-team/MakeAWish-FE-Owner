@@ -135,7 +135,7 @@ export default function OrderDetail() {
 
           <dl className="mt-3 grid grid-cols-3 gap-y-2 text-sm">
             {order.schemaAnswers && Object.entries(order.schemaAnswers).map(([key, val]) => {
-              if (key === 'refImage') return null; // 이미지는 아래에서 별도 렌더링
+              if (['refImage', 'customizedImageUrl', 'customized_image_url', 'cakeImage', 'selectedCakeImage'].includes(key)) return null; // 이미지는 아래에서 별도 렌더링
               
               // FIELD_LABEL에 있는 정적 키(size 등)는 그 라벨을 사용하고, 
               // 동적 커스텀 키('케이크 사이즈', '맛' 등)는 key 자체를 렌더링
@@ -153,7 +153,17 @@ export default function OrderDetail() {
           </dl>
 
           {order.schemaAnswers?.refImage && (
-            <img src={order.schemaAnswers.refImage} alt="참고 이미지" className="mt-3 h-32 w-32 rounded-2xl object-cover" />
+            <div className="mt-3">
+              <span className="text-xs text-cake-ink-soft">참고 이미지</span>
+              <img src={order.schemaAnswers.refImage} alt="참고 이미지" className="mt-1 h-32 w-32 rounded-2xl object-cover" />
+            </div>
+          )}
+
+          {(order.schemaAnswers?.customizedImageUrl || order.schemaAnswers?.customized_image_url || order.schemaAnswers?.cakeImage || order.schemaAnswers?.selectedCakeImage) && (
+            <div className="mt-3">
+              <span className="text-xs text-cake-ink-soft">요청 이미지 (AI 스케치)</span>
+              <img src={order.schemaAnswers.customizedImageUrl || order.schemaAnswers.customized_image_url || order.schemaAnswers.cakeImage || order.schemaAnswers.selectedCakeImage} alt="요청 이미지" className="mt-1 h-32 w-32 rounded-2xl object-cover" />
+            </div>
           )}
 
           {!rejecting && order.status === 'PENDING' && (
