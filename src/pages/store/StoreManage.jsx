@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { PencilSimple, Clock, Sparkle, IdentificationCard, Tag, Star, TrendUp } from '@phosphor-icons/react'
 import { useShopStore } from '../../store/useShopStore'
 import { useAuthStore } from '../../store/useAuthStore'
@@ -29,6 +30,7 @@ export default function StoreManage() {
     replyError,
   } = useShopStore()
 
+  const navigate = useNavigate()
   const [summary, setSummary] = useState(null)
 
   useEffect(() => {

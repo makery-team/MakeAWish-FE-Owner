@@ -66,6 +66,7 @@ export default function OrderSchemaEditor() {
 
     setSaving(true)
     await updateSchemaFields(selectedMenuId, validFields)
+    useShopStore.getState().fetchProfile()
     
     // update local menus state to reflect changes without refetching immediately
     const updatedProps = {}
