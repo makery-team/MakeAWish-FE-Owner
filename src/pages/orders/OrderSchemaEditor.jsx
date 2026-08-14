@@ -5,7 +5,7 @@ import { useShopStore } from '../../store/useShopStore'
 import PageHeader from '../../components/ui/PageHeader'
 import Card from '../../components/ui/Card'
 import Button from '../../components/ui/Button'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 
 export default function OrderSchemaEditor() {
   const { profile } = useShopStore()
@@ -18,15 +18,21 @@ export default function OrderSchemaEditor() {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
 
   useEffect(() => {
     if (profile?.categories && profile.categories.length > 0) {
       setMenus(profile.categories)
       if (!selectedMenuId) {
-        setSelectedMenuId(profile.categories[0].id)
+        const queryMenuId = searchParams.get('menuId')
+        if (queryMenuId && profile.categories.some(m => m.id === Number(queryMenuId))) {
+          setSelectedMenuId(Number(queryMenuId))
+        } else {
+          setSelectedMenuId(profile.categories[0].id)
+        }
       }
     }
-  }, [profile])
+  }, [profile, searchParams])
 
   // 선택된 메뉴가 바뀔 때마다 필드 초기화
   useEffect(() => {
@@ -101,17 +107,25 @@ export default function OrderSchemaEditor() {
       <PageHeader title="주문서 양식 설정" subtitle="AI 점원이 고객에게 물어볼 항목을 설정해요" back />
 
       <div className="flex flex-col gap-3 px-5">
-        <select
-          value={selectedMenuId || ''}
-          onChange={(e) => setSelectedMenuId(Number(e.target.value))}
-          className="w-full rounded-xl border border-cake-pink-200 bg-white px-4 py-3 text-sm font-semibold text-cake-ink outline-none"
-        >
-          {menus.map((menu) => (
-            <option key={menu.id} value={menu.id}>
-              {menu.name}
-            </option>
-          ))}
-        </select>
+        <div className="flex items-center gap-2">
+          <select
+            value={selectedMenuId || ''}
+            onChange={(e) => setSelectedMenuId(Number(e.target.value))}
+            className="flex-1 rounded-xl border border-cake-pink-200 bg-white px-4 py-3 text-sm font-semibold text-cake-ink outline-none"
+          >
+            {menus.map((menu) => (
+              <option key={menu.id} value={menu.id}>
+                {menu.name}
+              </option>
+            ))}
+          </select>
+          <button
+            onClick={() => navigate('/store/menus')}
+            className="flex h-[46px] items-center justify-center rounded-xl bg-cake-pink-50 px-4 text-xs font-bold text-cake-pink-600 active:bg-cake-pink-100"
+          >
+            메뉴 관리
+          </button>
+        </div>
 
         <div className="mb-2 rounded-2xl bg-cake-pink-50 p-4 text-[13px] leading-relaxed text-cake-pink-700">
           <p className="mb-1 font-bold text-cake-pink-600">💡 팁</p>

@@ -85,6 +85,12 @@ export default function MenuManager() {
             <div className="flex items-center justify-between">
               <span className="font-bold text-cake-ink">{menu.name}</span>
               <div className="flex gap-2">
+                <button
+                  onClick={() => navigate(`/orders/schema?menuId=${menu.id}`)}
+                  className="rounded bg-cake-pink-50 px-2 py-1 text-xs font-semibold text-cake-pink-600 active:bg-cake-pink-100"
+                >
+                  양식 설정
+                </button>
                 <button onClick={() => handleEditMenu(menu)} className="text-cake-ink-soft active:text-cake-pink-500">
                   <PencilSimple size={18} />
                 </button>
