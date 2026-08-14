@@ -17,6 +17,7 @@ export const usePortfolioStore = create(
           set({
             portfolios: data.map((p) => ({
               id: String(p.portfolioId),
+              productId: p.productId,
               title: p.title,
               description: p.description,
               imageUrl: p.imageUrl,
