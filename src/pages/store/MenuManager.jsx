@@ -85,7 +85,7 @@ export default function MenuManager() {
   }
 
   const filteredPortfolios = selectedProductId
-    ? portfolios.filter((p) => p.productId === selectedProductId)
+    ? portfolios.filter((p) => Number(p.productId) === Number(selectedProductId))
     : portfolios
 
   return (

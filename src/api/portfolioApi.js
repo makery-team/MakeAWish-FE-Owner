@@ -2,7 +2,14 @@ import { client } from './client'
 
 export async function fetchStorePortfolios(storeId = 1) {
   const res = await client.get(`/api/stores/${storeId}`)
-  return res.categories.flatMap((c) => c.portfolios).filter((p) => p.storeId === storeId)
+  if (!res || !res.categories) return []
+  return res.categories.flatMap((c) =>
+    (c.portfolios || []).map((p) => ({
+      ...p,
+      productId: c.id,
+      storeId: storeId,
+    }))
+  )
 }
 
 export async function uploadPortfolioImage(file) {
@@ -12,24 +19,31 @@ export async function uploadPortfolioImage(file) {
   return res.imageUrl
 }
 
-export async function createPortfolio({ title, description, imageUrl, tags }) {
-  // zustand store에서 현재 매장의 카테고리(Product) 목록을 가져와 첫 번째 카테고리에 연결합니다.
-  let productId = 1
-  try {
-    const { useShopStore } = await import('../store/useShopStore')
-    const { profile } = useShopStore.getState()
-    if (profile && profile.categories && profile.categories.length > 0) {
-      productId = profile.categories[0].id
+export async function createPortfolio({ title, description, imageUrl, productId, tags }) {
+  let finalProductId = productId
+  if (!finalProductId) {
+    try {
+      const { useShopStore } = await import('../store/useShopStore')
+      const { profile } = useShopStore.getState()
+      if (profile && profile.categories && profile.categories.length > 0) {
+        finalProductId = profile.categories[0].id
+      }
+    } catch (e) {
+      console.error('Failed to get productId from shop store, defaulting to 1', e)
     }
-  } catch (e) {
-    console.error('Failed to get productId from shop store, defaulting to 1', e)
   }
 
-  return client.post('/api/portfolios', { title, description, imageUrl, productId, tags })
+  return client.post('/api/portfolios', { title, description, imageUrl, productId: Number(finalProductId), tags })
 }
 
-export async function updatePortfolio(portfolioId, { title, description, imageUrl, tags }) {
-  return client.patch(`/api/portfolios/${portfolioId}`, { title, description, imageUrl, tags })
+export async function updatePortfolio(portfolioId, { title, description, imageUrl, productId, tags }) {
+  return client.patch(`/api/portfolios/${portfolioId}`, {
+    title,
+    description,
+    imageUrl,
+    productId: productId ? Number(productId) : undefined,
+    tags,
+  })
 }
 
 export async function recommendPortfolioTags({ imageUrl, description }) {
