@@ -471,9 +471,25 @@ export default function StoreManage() {
               관리하기
             </Button>
           </div>
-          <p className="mt-2 text-xs text-cake-ink-soft">
-            포트폴리오와 주문서를 분류할 메뉴(도시락 케이크, 입체 케이크 등)를 설정합니다.
+          <p className="mt-1 text-xs text-cake-ink-soft">
+            포트폴리오와 주문서를 분류할 메뉴(도시락 케이크, 입체 케이크 등)와 기본 가격을 설정합니다.
           </p>
+          
+          {/* 등록된 메뉴 목록 미리보기 */}
+          <div className="mt-3 flex flex-col gap-1.5">
+            {profile.categories && profile.categories.length > 0 ? (
+              profile.categories.map((c) => (
+                <div key={c.id} className="flex items-center justify-between rounded-xl bg-cake-pink-50/60 px-3 py-2 text-xs">
+                  <span className="font-semibold text-cake-ink">{c.name}</span>
+                  <span className="font-bold text-cake-pink-600">
+                    {c.price ? `${Number(c.price).toLocaleString()}원~` : '가격 미설정'}
+                  </span>
+                </div>
+              ))
+            ) : (
+              <p className="text-xs text-cake-ink-soft py-1">등록된 메뉴가 없어요. [관리하기]를 눌러 메뉴를 추가해보세요!</p>
+            )}
+          </div>
         </Card>
 
         {/* 계정 관리 카드 */}
