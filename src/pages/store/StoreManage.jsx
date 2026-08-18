@@ -492,6 +492,21 @@ export default function StoreManage() {
           </div>
         </Card>
 
+        {/* 고객 리뷰 관리 카드 */}
+        <Card>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="flex items-center gap-1.5 text-sm font-bold text-cake-ink">고객 리뷰 및 답글 관리</p>
+              <p className="mt-0.5 text-xs text-cake-ink-soft">
+                고객이 남긴 소중한 후기를 확인하고 사장님 공식 답글을 작성합니다.
+              </p>
+            </div>
+            <Button variant="secondary" className="px-3 py-1 text-xs shrink-0" onClick={() => navigate('/reviews')}>
+              리뷰 관리
+            </Button>
+          </div>
+        </Card>
+
         {/* 계정 관리 카드 */}
         <Card>
           <p className="text-sm font-bold text-cake-ink">계정 관리</p>

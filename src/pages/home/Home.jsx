@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Sparkle, CaretRight, ChartBar } from '@phosphor-icons/react'
+import { Sparkle, CaretRight, ChartBar, Star } from '@phosphor-icons/react'
 import { useAuthStore } from '../../store/useAuthStore'
 import { useShopStore } from '../../store/useShopStore'
 import { useOrderStore } from '../../store/useOrderStore'
@@ -40,21 +40,33 @@ export default function Home() {
         </div>
       </Card>
 
-      <Card
-        onClick={() => navigate('/stats')}
-        className="mt-4 flex cursor-pointer items-center justify-between active:scale-[0.98]"
-      >
-        <div className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-cake-mint-100 text-cake-mint-600">
-            <ChartBar size={18} weight="fill" />
+      <div className="mt-4 grid grid-cols-2 gap-3">
+        <Card
+          onClick={() => navigate('/stats')}
+          className="flex cursor-pointer flex-col justify-between p-3.5 active:scale-[0.98]"
+        >
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-cake-mint-100 text-cake-mint-600">
+            <ChartBar size={17} weight="fill" />
           </div>
-          <div>
-            <p className="text-sm font-bold text-cake-ink">매출관리</p>
-            <p className="text-xs text-cake-ink-soft">매출 통계와 인기 메뉴를 확인해보세요</p>
+          <div className="mt-2">
+            <p className="text-xs font-bold text-cake-ink">매출 관리</p>
+            <p className="text-[11px] text-cake-ink-soft">통계 및 인기메뉴</p>
           </div>
-        </div>
-        <CaretRight size={16} className="text-cake-ink-soft" />
-      </Card>
+        </Card>
+
+        <Card
+          onClick={() => navigate('/reviews')}
+          className="flex cursor-pointer flex-col justify-between p-3.5 active:scale-[0.98]"
+        >
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 text-amber-600">
+            <Star size={17} weight="fill" />
+          </div>
+          <div className="mt-2">
+            <p className="text-xs font-bold text-cake-ink">리뷰 관리</p>
+            <p className="text-[11px] text-cake-ink-soft">고객 후기 & 답글</p>
+          </div>
+        </Card>
+      </div>
 
       <div className="mt-6 flex items-center justify-between">
         <h2 className="font-display text-lg text-cake-ink">오늘의 주문 ({todayOrders.length})</h2>
