@@ -41,9 +41,9 @@ export const useOrderStore = create(
           expectedRevenue,
         }
       },
-      getOrderById: (orderId) => get().orders.find((o) => o.id === orderId),
-      getExtraChargesByOrder: (orderId) => get().extraCharges.filter((c) => c.orderId === orderId),
-      getPaymentByOrder: (orderId) => get().payments.find((p) => p.orderId === orderId),
+      getOrderById: (orderId) => get().orders.find((o) => String(o.id) === String(orderId)),
+      getExtraChargesByOrder: (orderId) => get().extraCharges.filter((c) => String(c.orderId) === String(orderId)),
+      getPaymentByOrder: (orderId) => get().payments.find((p) => String(p.orderId) === String(orderId)),
       resetOrders: () => set({ orders: INITIAL_ORDERS, todayOrders: [] }),
 
       fetchTodayOrders: async () => {
@@ -68,7 +68,7 @@ export const useOrderStore = create(
         }
         set((state) => ({
           orders: state.orders.map((o) =>
-            o.id === orderId ? { ...o, status, ...(reason ? { rejectReason: reason } : {}) } : o,
+            String(o.id) === String(orderId) ? { ...o, status, ...(reason ? { rejectReason: reason } : {}) } : o,
           ),
         }))
       },
@@ -85,17 +85,24 @@ export const useOrderStore = create(
           await randomDelay()
         }
         const charge = { id: genId('extra'), orderId, reason, amount: Number(amount), createdAt: todayIso() }
-        set((state) => ({ extraCharges: [...state.extraCharges, charge] }))
+        set((state) => ({
+          extraCharges: [...state.extraCharges.filter((c) => String(c.orderId) !== String(orderId)), charge],
+        }))
         return charge
       },
 
       syncExtraChargeFromServer: (orderId, { extraFee, reason }) => {
-        if (!extraFee || Number(extraFee) <= 0) return
-        const existing = get().extraCharges.find((c) => c.orderId === orderId)
+        if (!extraFee || Number(extraFee) <= 0) {
+          set((state) => ({
+            extraCharges: state.extraCharges.filter((c) => String(c.orderId) !== String(orderId)),
+          }))
+          return
+        }
+        const existing = get().extraCharges.find((c) => String(c.orderId) === String(orderId))
         if (existing) {
           set((state) => ({
             extraCharges: state.extraCharges.map((c) =>
-              c.orderId === orderId ? { ...c, amount: Number(extraFee), reason: reason || c.reason } : c,
+              String(c.orderId) === String(orderId) ? { ...c, amount: Number(extraFee), reason: reason || c.reason } : c,
             ),
           }))
         } else {

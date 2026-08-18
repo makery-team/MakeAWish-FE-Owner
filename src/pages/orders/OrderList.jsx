@@ -88,13 +88,20 @@ export default function OrderList() {
         }
       />
 
-      <div className="scrollbar-none flex gap-2 overflow-x-auto px-5 pb-1">
+      <div
+        className="flex gap-2 overflow-x-auto px-5 pb-1 select-none whitespace-nowrap"
+        style={{
+          WebkitOverflowScrolling: 'touch',
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+        }}
+      >
         {FILTERS.map((f) => (
           <button
             key={f.key}
             onClick={() => setFilter(f.key)}
             className={`shrink-0 rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors ${
-              filter === f.key ? 'bg-cake-pink-500 text-white' : 'bg-white text-cake-ink-soft ring-1 ring-cake-pink-100'
+              filter === f.key ? 'bg-cake-pink-500 text-white shadow-sm' : 'bg-white text-cake-ink-soft ring-1 ring-cake-pink-100'
             }`}
           >
             {f.label}

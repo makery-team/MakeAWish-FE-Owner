@@ -63,8 +63,11 @@ export default function OrderDetail() {
         }
         try {
           const feeData = await fetchExtraFee(orderId)
-          if (isMounted && feeData && Number(feeData.extraFee) > 0) {
-            syncExtraChargeFromServer(orderId, { extraFee: feeData.extraFee, reason: feeData.reason })
+          if (isMounted) {
+            syncExtraChargeFromServer(orderId, {
+              extraFee: (feeData && feeData.extraFee) || 0,
+              reason: (feeData && feeData.reason) || '',
+            })
           }
         } catch (feeError) {
           console.warn('실서버 추가금 조회 실패 (로컬 Mock 사용):', feeError.message)
@@ -114,7 +117,11 @@ export default function OrderDetail() {
     }
   }
 
-  const totalPrice = (Number(order.price) || 0) + extraCharges.reduce((sum, c) => sum + (Number(c.amount) || 0), 0)
+  const extraTotal = extraCharges.reduce((sum, c) => sum + (Number(c.amount) || 0), 0)
+  const basePrice = serverOrder
+    ? Math.max(0, Number(serverOrder.totalPrice ?? serverOrder.price ?? 0) - extraTotal)
+    : Number(mockOrder?.price || 0)
+  const totalPrice = basePrice + extraTotal
 
   return (
     <div className="pb-6">
