@@ -467,7 +467,7 @@ export default function StoreManage() {
         <Card>
           <div className="flex items-center justify-between">
             <p className="flex items-center gap-1.5 text-sm font-bold text-cake-ink">메뉴(카테고리) 관리</p>
-            <Button variant="secondary" className="px-3 py-1 text-xs" onClick={() => navigate('/store/menus')}>
+            <Button variant="secondary" className="px-3 py-1 text-xs" onClick={() => navigate('/menus')}>
               관리하기
             </Button>
           </div>
