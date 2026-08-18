@@ -290,13 +290,13 @@ export default function OrderDetail() {
         <Card>
           <div className="flex items-center justify-between">
             <p className="flex items-center gap-1.5 text-sm font-bold text-cake-ink"><CreditCard size={18} className="text-cake-pink-500" /> 결제 정보</p>
-            {['PAID', 'IN_PROGRESS', 'PICKUP_READY', 'COMPLETED'].includes(order.status) || payment ? (
+            {['PAID', 'IN_PROGRESS', 'PICKUP_READY', 'COMPLETED'].includes(order.status) ? (
               <span className="text-xs font-bold text-cake-mint-600 bg-cake-mint-50 px-2 py-0.5 rounded-full">결제 완료</span>
             ) : (
               <span className="text-xs font-bold text-cake-yellow-600 bg-cake-yellow-50 px-2 py-0.5 rounded-full">미결제 (입금 대기)</span>
             )}
           </div>
-          {['PAID', 'IN_PROGRESS', 'PICKUP_READY', 'COMPLETED'].includes(order.status) || payment ? (
+          {['PAID', 'IN_PROGRESS', 'PICKUP_READY', 'COMPLETED'].includes(order.status) ? (
             <div className="mt-2 text-xs text-cake-ink-soft bg-cake-pink-50/50 p-2.5 rounded-xl flex justify-between items-center">
               <span>결제 금액: <b className="text-cake-ink">{totalPrice.toLocaleString()}원</b></span>
               <span className="text-[11px] text-cake-mint-600 font-semibold">토스 결제 승인됨</span>
