@@ -11,9 +11,11 @@ import EmptyState from '../../components/ui/EmptyState'
 
 const FILTERS = [
   { key: 'ALL', label: '전체' },
-  { key: 'PENDING', label: '수락 대기' },
-  { key: 'ACCEPTED', label: '제작 예정' },
+  { key: 'PENDING', label: '견적 대기' },
+  { key: 'QUOTED', label: '입금 대기' },
+  { key: 'PAID', label: '결제 완료' },
   { key: 'IN_PROGRESS', label: '제작 중' },
+  { key: 'PICKUP_READY', label: '픽업 대기' },
   { key: 'COMPLETED', label: '완료' },
 ]
 
@@ -60,7 +62,15 @@ export default function OrderList() {
     }
   }, [])
 
-  const filtered = filter === 'ALL' ? orders : orders.filter((o) => o.status === filter)
+  const filtered = filter === 'ALL' ? orders : orders.filter((o) => {
+    if (filter === 'PENDING') return o.status === 'PENDING' || o.status === 'PENDING_QUOTE'
+    if (filter === 'QUOTED') return o.status === 'QUOTED' || o.status === 'APPROVED' || o.status === 'ACCEPTED'
+    if (filter === 'PAID') return o.status === 'PAID'
+    if (filter === 'IN_PROGRESS') return o.status === 'IN_PROGRESS'
+    if (filter === 'PICKUP_READY') return o.status === 'PICKUP_READY'
+    if (filter === 'COMPLETED') return o.status === 'COMPLETED'
+    return o.status === filter
+  })
   const sorted = [...filtered].sort((a, b) => (a.requestedDate < b.requestedDate ? 1 : -1))
 
   return (
