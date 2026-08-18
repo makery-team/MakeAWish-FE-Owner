@@ -35,8 +35,18 @@ export async function updateStoreProfile(data) {
   if (data.notice !== undefined) payload.notice = data.notice
   if (data.cautionNotice !== undefined) payload.cautionNotice = data.cautionNotice
   if (data.keywords !== undefined) payload.keywords = data.keywords
+  if (data.imageUrl !== undefined || data.profileImage !== undefined) {
+    payload.imageUrl = data.imageUrl || data.profileImage
+  }
 
   return client.patch('/api/stores/profile', payload)
+}
+
+export async function uploadStoreImage(file) {
+  const formData = new FormData()
+  formData.append('file', file)
+  const res = await client.post('/api/images/upload', formData)
+  return res.imageUrl
 }
 
 export async function suggestProfileImprovement() {
