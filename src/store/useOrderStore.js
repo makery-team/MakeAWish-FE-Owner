@@ -29,8 +29,8 @@ export const useOrderStore = create(
       todayOrders: [],
       getTodayBriefing: () => {
         const orders = get().todayOrders || []
-        const pendingCount = orders.filter(o => o.status === 'PENDING').length
-        const inProgressCount = orders.filter(o => o.status === 'IN_PROGRESS' || o.status === 'ACCEPTED' || o.status === 'PICKUP_READY').length
+        const pendingCount = orders.filter(o => o.status === 'PENDING' || o.status === 'PENDING_QUOTE').length
+        const inProgressCount = orders.filter(o => o.status === 'IN_PROGRESS' || o.status === 'PAID' || o.status === 'ACCEPTED' || o.status === 'QUOTED' || o.status === 'PICKUP_READY').length
         const expectedRevenue = orders.reduce((sum, o) => sum + (o.totalPrice || o.price || 0), 0)
         return {
           summary: orders.length === 0 
