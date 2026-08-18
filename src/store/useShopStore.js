@@ -53,6 +53,8 @@ export const useShopStore = create(
               notice: data.notice || '',
               cautionNotice: data.cautionNotice || '',
               keywords: data.keywords || '',
+              profileImage: data.imageUrl || data.profileImage || state.profile.profileImage,
+              imageUrl: data.imageUrl || data.profileImage || state.profile.imageUrl,
               businessHours: parsedHours,
             },
           }))
@@ -102,6 +104,24 @@ export const useShopStore = create(
           await storeApi.updateStoreProfile(updatedProfile)
         } catch (err) {
           set({ profileError: err.message || '저장에 실패했어요. 다시 시도해주세요' })
+        }
+      },
+
+      uploadProfileImage: async (file) => {
+        try {
+          const imageUrl = await storeApi.uploadStoreImage(file)
+          const updatedProfile = {
+            ...get().profile,
+            profileImage: imageUrl,
+            imageUrl,
+          }
+          set({ profile: updatedProfile, profileError: '' })
+          await storeApi.updateStoreProfile(updatedProfile)
+          return imageUrl
+        } catch (err) {
+          console.error('Failed to upload store profile image:', err)
+          set({ profileError: '프로필 사진 업로드에 실패했습니다.' })
+          throw err
         }
       },
 

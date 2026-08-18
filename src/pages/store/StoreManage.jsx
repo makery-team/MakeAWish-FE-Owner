@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { PencilSimple, Clock, Sparkle, IdentificationCard, Tag, Star, TrendUp } from '@phosphor-icons/react'
+import { PencilSimple, Clock, Sparkle, IdentificationCard, Tag, Star, TrendUp, Camera } from '@phosphor-icons/react'
 import { useShopStore } from '../../store/useShopStore'
 import { useAuthStore } from '../../store/useAuthStore'
 import PageHeader from '../../components/ui/PageHeader'
@@ -19,6 +19,7 @@ export default function StoreManage() {
     suggestions,
     priceAnalysis,
     updateProfile,
+    uploadProfileImage,
     generateIntro,
     replyToReview,
     getReviewSummary,
@@ -32,6 +33,8 @@ export default function StoreManage() {
 
   const navigate = useNavigate()
   const [summary, setSummary] = useState(null)
+  const fileInputRef = useRef(null)
+  const [uploadingImage, setUploadingImage] = useState(false)
 
   useEffect(() => {
     fetchProfile()
@@ -92,8 +95,46 @@ export default function StoreManage() {
       <div className="flex flex-col gap-4 px-5">
         <Card>
           <div className="flex items-center gap-3">
-            <img src={profile.profileImage} alt="" className="h-16 w-16 rounded-2xl object-cover" />
-            <div className="flex-1">
+            <div className="relative group shrink-0">
+              <img
+                src={profile.imageUrl || profile.profileImage}
+                alt="매장 프로필"
+                className="h-16 w-16 rounded-2xl object-cover ring-2 ring-cake-pink-100"
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadingImage}
+                className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-white shadow-md ring-1 ring-cake-pink-200 text-cake-pink-500 hover:bg-cake-pink-50 active:scale-95 transition-transform"
+                title="프로필 사진 변경"
+              >
+                {uploadingImage ? (
+                  <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-cake-pink-500 border-t-transparent" />
+                ) : (
+                  <Camera size={13} weight="bold" />
+                )}
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0]
+                  if (!file) return
+                  setUploadingImage(true)
+                  try {
+                    await uploadProfileImage(file)
+                  } catch (err) {
+                    alert('사진 업로드 중 오류가 발생했습니다.')
+                  } finally {
+                    setUploadingImage(false)
+                    if (fileInputRef.current) fileInputRef.current.value = ''
+                  }
+                }}
+              />
+            </div>
+            <div className="flex-1 min-w-0">
               {editing ? (
                 <input
                   value={form.storeName}
