@@ -96,7 +96,7 @@ export default function OrderSchemaEditor() {
         <PageHeader title="주문서 양식 설정" back />
         <div className="flex-1 flex flex-col items-center justify-center gap-3 px-5 text-center">
           <p className="text-cake-ink-soft text-sm">먼저 메뉴(카테고리)를 등록해야 양식을 설정할 수 있어요.</p>
-          <Button onClick={() => navigate('/store/menus')}>메뉴 등록하러 가기</Button>
+          <Button onClick={() => navigate('/menus')}>메뉴 등록하러 가기</Button>
         </div>
       </div>
     )
@@ -120,7 +120,7 @@ export default function OrderSchemaEditor() {
             ))}
           </select>
           <button
-            onClick={() => navigate('/store/menus')}
+            onClick={() => navigate('/menus')}
             className="flex h-[46px] items-center justify-center rounded-xl bg-cake-pink-50 px-4 text-xs font-bold text-cake-pink-600 active:bg-cake-pink-100"
           >
             메뉴 관리

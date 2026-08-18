@@ -75,7 +75,7 @@ export default function PortfolioForm() {
       const payload = { productId, title, description, imageUrl, tags }
       if (existing) await updatePortfolio(existing.id, payload)
       else await createPortfolio(payload)
-      navigate('/portfolio')
+      navigate('/menus')
     } catch (err) {
       setSaveError(err.message || '저장에 실패했어요. 다시 시도해주세요')
     } finally {

@@ -42,11 +42,12 @@ export default function App() {
           <Route path="/orders/schema" element={<OrderSchemaEditor />} />
           <Route path="/orders/:orderId" element={<OrderDetail />} />
           <Route path="/orders/:orderId/chat" element={<OrderChat />} />
-          <Route path="/portfolio" element={<PortfolioList />} />
+          <Route path="/menus" element={<MenuManager />} />
+          <Route path="/portfolio" element={<Navigate to="/menus" replace />} />
           <Route path="/portfolio/new" element={<PortfolioForm />} />
           <Route path="/portfolio/:portfolioId/edit" element={<PortfolioForm />} />
           <Route path="/store" element={<StoreManage />} />
-          <Route path="/store/menus" element={<MenuManager />} />
+          <Route path="/store/menus" element={<Navigate to="/menus" replace />} />
           <Route path="/stats" element={<Stats />} />
           <Route path="/chat" element={<ChatManage />} />
         </Route>
