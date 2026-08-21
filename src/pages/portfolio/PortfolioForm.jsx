@@ -147,12 +147,46 @@ export default function PortfolioForm() {
           </div>
           {!imageUrl && <p className="mt-1 text-xs text-cake-ink-soft">이미지를 먼저 선택하면 태그를 추천받을 수 있어요</p>}
           {recommendError && <p className="mt-1 text-xs font-medium text-red-500">{recommendError}</p>}
+          
+          <div className="mt-2 flex items-center gap-1.5 rounded-xl bg-cake-pink-50/80 px-3 py-2 text-xs text-cake-pink-600">
+            <span>💡</span>
+            <span>첫 번째 태그는 소비자 앱 카드 좌측 상단에 <b>대표 뱃지</b>로 노출됩니다.</span>
+          </div>
+
           <div className="mt-2 flex flex-wrap gap-1.5">
             {tags.length === 0 && <p className="text-xs text-cake-ink-soft">등록된 태그가 없어요</p>}
-            {tags.map((t) => (
-              <span key={t} className="flex items-center gap-1 rounded-full bg-cake-lavender-100 px-2.5 py-1 text-xs font-medium text-cake-lavender-600">
+            {tags.map((t, idx) => (
+              <span
+                key={t}
+                className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-all ${
+                  idx === 0
+                    ? 'bg-cake-pink-500 text-white shadow-cake-xs'
+                    : 'bg-cake-lavender-100 text-cake-lavender-600'
+                }`}
+              >
+                {idx === 0 && (
+                  <span className="flex items-center gap-0.5 rounded-full bg-white/20 px-1.5 py-0.5 text-[10px] font-bold">
+                    ⭐ 대표
+                  </span>
+                )}
                 #{t}
-                <button onClick={() => setTags((prev) => prev.filter((tag) => tag !== t))} aria-label="태그 삭제">
+                {idx > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTags((prev) => [t, ...prev.filter((item) => item !== t)])
+                    }}
+                    title="대표 태그로 설정"
+                    className="text-[10px] underline opacity-75 hover:opacity-100"
+                  >
+                    대표로 설정
+                  </button>
+                )}
+                <button
+                  onClick={() => setTags((prev) => prev.filter((tag) => tag !== t))}
+                  aria-label="태그 삭제"
+                  className={idx === 0 ? 'text-white/80 hover:text-white' : 'text-cake-lavender-600'}
+                >
                   <X size={12} />
                 </button>
               </span>
