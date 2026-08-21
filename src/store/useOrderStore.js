@@ -2,9 +2,6 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { randomDelay, genId, todayIso } from '../lib/time'
 import {
-  INITIAL_ORDERS,
-  INITIAL_EXTRA_CHARGES,
-  INITIAL_PAYMENTS,
   ORDER_SCHEMA_FIELDS,
   TODAY_BRIEFING,
 } from '../mocks/seed'
@@ -16,6 +13,15 @@ import {
 } from '../api/orderApi'
 import { updateOrderSchema as apiUpdateOrderSchema } from '../api/storeApi'
 import { useShopStore } from './useShopStore'
+
+// 레거시 mock 캐시 정리
+try {
+  if (typeof window !== 'undefined' && window.localStorage) {
+    window.localStorage.removeItem('cake-orders')
+  }
+} catch (e) {
+  // ignore
+}
 
 export const useOrderStore = create(
   persist(
@@ -158,8 +164,8 @@ export const useOrderStore = create(
       },
     }),
     {
-      name: 'cake-orders',
-      version: 2,
+      name: 'cake-orders-v3',
+      version: 3,
     },
   ),
 )
