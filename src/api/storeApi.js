@@ -57,3 +57,7 @@ export async function generateBio(payload = {}) {
   return client.post('/api/stores/ai/generate-bio', payload)
 }
 export async function updateOrderSchema(storeId, payload) { return client.post(`/api/stores/${storeId}/order-schema`, payload) }
+
+export async function closeMyStore() {
+  return client.delete('/api/stores/me')
+}
