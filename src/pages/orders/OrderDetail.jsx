@@ -11,6 +11,7 @@ import {
 import { useOrderStore } from '../../store/useOrderStore'
 import { useChatStore } from '../../store/useChatStore'
 import { fetchOrderById, fetchExtraFee } from '../../api/orderApi'
+import { fetchChatRooms } from '../../api/chatApi'
 import PageHeader from '../../components/ui/PageHeader'
 import Card from '../../components/ui/Card'
 import Button from '../../components/ui/Button'
@@ -52,9 +53,10 @@ export default function OrderDetail() {
           const mapped = {
             id: data.id || data.orderId || orderId,
             status: data.orderStatus || data.status || 'PENDING',
-            customerName: data.customerName || data.userName || (data.orderData && (data.orderData.customerName || data.orderData.name)) || '주문 고객',
-            customerPhone: data.customerPhone || data.phoneNumber || (data.orderData && (data.orderData.customerPhone || data.orderData.phone)) || '010-0000-0000',
-            cakeType: data.cakeType || data.designName || (Array.isArray(data.items) && data.items[0]?.productName) || '주문제작 케이크',
+            customerId: data.customerId || data.userId || (data.user && data.user.id),
+            customerName: data.customerName || data.userName || (data.user && (data.user.name || data.user.nickname)) || (data.orderData && (data.orderData.customerName || data.orderData.name)) || '주문 고객',
+            customerPhone: data.customerPhone || data.phoneNumber || (data.user && data.user.phoneNumber) || (data.orderData && (data.orderData.customerPhone || data.orderData.phone)) || '010-0000-0000',
+            cakeType: data.cakeType || data.designName || (Array.isArray(data.items) && data.items[0]?.name) || (Array.isArray(data.items) && data.items[0]?.productName) || '주문제작 케이크',
             price: Number(data.totalPrice ?? data.price ?? 0),
             requestedDate: data.requestedDate || (data.pickupDate && String(data.pickupDate).split('T')[0]) || '2026-07-30',
             pickupTime: data.pickupTime || (data.pickupDate && String(data.pickupDate).split('T')[1]?.slice(0, 5)) || '14:00',
@@ -227,7 +229,38 @@ export default function OrderDetail() {
         </Card>
 
         <button
-          onClick={() => navigate(`/orders/${orderId}/chat`)}
+          onClick={async () => {
+            try {
+              // 1. 실서버 1:1 채팅방 목록 조회
+              const rooms = await fetchChatRooms()
+              // 2. 고객 ID 또는 고객 이름으로 해당 방 검색
+              const matched = Array.isArray(rooms)
+                ? rooms.find((r) => {
+                    const matchId = order.customerId && String(r.otherId) === String(order.customerId)
+                    const matchName = order.customerName && order.customerName !== '주문 고객' && r.otherName === order.customerName
+                    return matchId || matchName
+                  })
+                : null
+
+              if (matched) {
+                navigate(`/chat/${matched.roomNumber}`, {
+                  state: { customerName: matched.otherName || order.customerName, otherId: matched.otherId },
+                })
+              } else if (Array.isArray(rooms) && rooms.length > 0) {
+                // 단일 방이 있거나 가장 최근 방으로 이동
+                navigate(`/chat/${rooms[0].roomNumber}`, {
+                  state: { customerName: rooms[0].otherName || order.customerName, otherId: rooms[0].otherId },
+                })
+              } else {
+                alert(
+                  `아직 ${order.customerName}님과의 1:1 채팅방이 열리지 않았습니다.\n소비자 앱에서 고객이 [1:1 채팅 문의]를 시작하면 실시간으로 연결됩니다.`
+                )
+              }
+            } catch (err) {
+              console.error('채팅방 이동 실패:', err)
+              navigate('/chat')
+            }
+          }}
           className="flex items-center justify-between rounded-3xl bg-white p-4 shadow-cake-sm ring-1 ring-cake-pink-100 active:scale-[0.98]"
         >
           <span className="flex items-center gap-2 text-sm font-semibold text-cake-ink">
