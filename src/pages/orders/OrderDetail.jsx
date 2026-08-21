@@ -6,6 +6,7 @@ import {
   Sparkle,
   Plus,
   Phone,
+  Trash,
 } from '@phosphor-icons/react'
 import { useOrderStore } from '../../store/useOrderStore'
 import { useChatStore } from '../../store/useChatStore'
@@ -27,6 +28,7 @@ export default function OrderDetail() {
     getPaymentByOrder,
     updateOrderStatus,
     createExtraCharge,
+    deleteExtraCharge,
     syncExtraChargeFromServer,
     createPayment,
     createMessageDraft,
@@ -117,6 +119,7 @@ export default function OrderDetail() {
     }
   }
 
+  const isPaid = ['PAID', 'IN_PROGRESS', 'PICKUP_READY', 'COMPLETED'].includes(order.status)
   const extraTotal = extraCharges.reduce((sum, c) => sum + (Number(c.amount) || 0), 0)
   const basePrice = serverOrder
     ? Math.max(0, Number(serverOrder.totalPrice ?? serverOrder.price ?? 0) - extraTotal)
@@ -241,20 +244,52 @@ export default function OrderDetail() {
         <Card>
           <div className="flex items-center justify-between">
             <p className="text-sm font-bold text-cake-ink">추가금</p>
-            <button onClick={() => setShowExtraForm((v) => !v)} className="flex items-center gap-1 text-xs font-semibold text-cake-pink-500">
-              <Plus size={14} /> 추가
-            </button>
+            {isPaid ? (
+              <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-semibold text-gray-500">
+                결제 완료 (수정 불가)
+              </span>
+            ) : (
+              <button onClick={() => setShowExtraForm((v) => !v)} className="flex items-center gap-1 text-xs font-semibold text-cake-pink-500">
+                <Plus size={14} /> 추가
+              </button>
+            )}
           </div>
           <div className="mt-2 flex flex-col gap-1.5">
             {extraCharges.length === 0 && <p className="text-xs text-cake-ink-soft">등록된 추가금이 없어요</p>}
             {extraCharges.map((c) => (
-              <div key={c.id} className="flex justify-between text-sm">
+              <div key={c.id} className="flex items-center justify-between text-sm">
                 <span className="text-cake-ink-soft">{c.reason}</span>
-                <span className="font-medium text-cake-ink">+{c.amount.toLocaleString()}원</span>
+                <div className="flex items-center gap-2">
+                  <span className="font-medium text-cake-ink">+{Number(c.amount).toLocaleString()}원</span>
+                  {!isPaid && (
+                    <button
+                      onClick={async () => {
+                        if (window.confirm('등록된 추가금을 삭제하시겠습니까?')) {
+                          try {
+                            await deleteExtraCharge(orderId)
+                            if (serverOrder) {
+                              setServerOrder((prev) => ({
+                                ...prev,
+                                totalPrice: Math.max(0, Number(prev.totalPrice || 0) - Number(c.amount)),
+                              }))
+                            }
+                          } catch (error) {
+                            console.error('추가금 삭제 실패:', error.message)
+                            alert('추가금 삭제 중 오류가 발생했습니다.')
+                          }
+                        }
+                      }}
+                      className="rounded-lg p-1 text-gray-400 transition hover:bg-red-50 hover:text-red-500"
+                      title="추가금 삭제"
+                    >
+                      <Trash size={15} />
+                    </button>
+                  )}
+                </div>
               </div>
             ))}
           </div>
-          {showExtraForm && (
+          {showExtraForm && !isPaid && (
             <div className="mt-3 flex flex-col gap-2 rounded-2xl bg-cake-pink-50 p-3">
               <input
                 value={extraReason}
@@ -275,6 +310,12 @@ export default function OrderDetail() {
                 onClick={async () => {
                   try {
                     await createExtraCharge(orderId, { reason: extraReason, amount: extraAmount })
+                    if (serverOrder) {
+                      setServerOrder((prev) => ({
+                        ...prev,
+                        totalPrice: Number(prev.totalPrice || 0) + Number(extraAmount),
+                      }))
+                    }
                     setExtraReason('')
                     setExtraAmount('')
                     setShowExtraForm(false)
