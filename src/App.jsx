@@ -16,6 +16,7 @@ import MenuManager from './pages/store/MenuManager'
 import ReviewManager from './pages/reviews/ReviewManager'
 import Stats from './pages/stats/Stats'
 import ChatManage from './pages/chat/ChatManage'
+import ChatRoom from './pages/chat/ChatRoom'
 
 function Gate({ children }) {
   const { isLoggedIn, onboarded } = useAuthStore()
@@ -52,6 +53,7 @@ export default function App() {
           <Route path="/reviews" element={<ReviewManager />} />
           <Route path="/stats" element={<Stats />} />
           <Route path="/chat" element={<ChatManage />} />
+          <Route path="/chat/:roomNumber" element={<ChatRoom />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/home" replace />} />

@@ -56,6 +56,7 @@ export const useAuthStore = create(
             refreshToken: res.refreshToken,
             onboarded: isOnboarded,
             user: {
+              id: profile.id,
               name: profile.nickname || profile.name || res.name || '사장님',
               realName: profile.name || res.name || '사장님',
               email: profile.email || 'partner@dalkomgongbang.com',
@@ -66,6 +67,26 @@ export const useAuthStore = create(
         } catch (error) {
           console.error('로그인 API 연동 실패:', error)
           throw error
+        }
+      },
+
+      fetchUserProfile: async () => {
+        try {
+          const profile = await userApi.getUserProfile()
+          if (profile) {
+            set((state) => ({
+              user: {
+                ...(state.user || {}),
+                id: profile.id,
+                name: profile.nickname || profile.name || state.user?.name || '사장님',
+                realName: profile.name || state.user?.realName || '사장님',
+                email: profile.email || state.user?.email || '',
+              },
+            }))
+            return profile
+          }
+        } catch (error) {
+          console.warn('[useAuthStore] fetchUserProfile error:', error)
         }
       },
 
