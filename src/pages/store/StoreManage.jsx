@@ -566,20 +566,20 @@ export default function StoreManage() {
               variant="secondary"
               className="flex-1 text-xs text-red-500 hover:bg-red-50 hover:text-red-600"
               onClick={async () => {
-                if (window.confirm('정말 계정을 탈퇴하시겠습니까? (이 작업은 되돌릴 수 없습니다)')) {
+                if (window.confirm('정말 매장을 해지(폐업)하시겠습니까?\n\n사장님 권한 및 등록된 매장 정보만 삭제되며, 일반 구매자(소비자) 계정은 안전하게 유지됩니다.')) {
                   try {
-                    const { client } = await import('../../api/client')
-                    await client.delete('/api/users/me')
-                    alert('계정이 성공적으로 삭제되었습니다.')
+                    const { closeMyStore } = await import('../../api/storeApi')
+                    await closeMyStore()
+                    alert('매장이 성공적으로 해지되었습니다.\n일반 소비자 계정은 계속 이용하실 수 있습니다.')
                     useAuthStore.getState().logout()
                     window.location.href = '/login'
                   } catch (e) {
-                    alert('계정 삭제에 실패했습니다.')
+                    alert('매장 해지 중 오류가 발생했습니다.')
                   }
                 }
               }}
             >
-              ⚠️ 계정 탈퇴
+              ⚠️ 매장 해지 / 탈퇴
             </Button>
           </div>
         </Card>
