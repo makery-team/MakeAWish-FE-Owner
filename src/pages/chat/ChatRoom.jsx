@@ -65,7 +65,7 @@ export default function ChatRoom() {
   }
 
   return (
-    <div className="flex h-dvh flex-col bg-cake-pink-50/20">
+    <div className="flex h-full flex-1 flex-col bg-cake-pink-50/20 overflow-hidden">
       <PageHeader 
         title={`${customerName} 님과의 대화`} 
         subtitle={isConnected ? '실시간 연결됨 🟢' : '연결 중... 🟡'} 
@@ -74,14 +74,14 @@ export default function ChatRoom() {
 
       {/* 실시간 연결 상태 배너 */}
       {!isConnected && (
-        <div className="flex items-center justify-center gap-1.5 bg-cake-yellow-50 py-1.5 text-xs font-semibold text-cake-yellow-600">
+        <div className="shrink-0 flex items-center justify-center gap-1.5 bg-cake-yellow-50 py-1.5 text-xs font-semibold text-cake-yellow-600 border-b border-cake-yellow-200/60">
           <WarningCircle size={14} />
           <span>실시간 채팅 서버에 연결 중입니다...</span>
         </div>
       )}
 
       {/* 대화 영역 */}
-      <div className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
+      <div className="flex-1 min-h-0 space-y-3 overflow-y-auto px-4 py-4">
         {!historyLoaded && (
           <div className="py-12 text-center">
             <Spinner label="대화 기록을 불러오는 중..." />
@@ -139,7 +139,7 @@ export default function ChatRoom() {
       </div>
 
       {/* 입력 영역 */}
-      <div className="sticky bottom-0 flex items-center gap-2 border-t border-cake-pink-100 bg-white px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-lg">
+      <div className="shrink-0 flex items-center gap-2 border-t border-cake-pink-100 bg-white px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-lg">
         <input
           value={text}
           onChange={(e) => setText(e.target.value)}
