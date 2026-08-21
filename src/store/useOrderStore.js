@@ -97,6 +97,22 @@ export const useOrderStore = create(
         return charge
       },
 
+      deleteExtraCharge: async (orderId) => {
+        if (!isMockOrderId(orderId)) {
+          try {
+            await apiRegisterExtraFee(orderId, { amount: 0, reason: '' })
+          } catch (error) {
+            console.error('[useOrderStore] 실서버 추가금 삭제 실패:', error.message)
+            throw error
+          }
+        } else {
+          await randomDelay()
+        }
+        set((state) => ({
+          extraCharges: state.extraCharges.filter((c) => String(c.orderId) !== String(orderId)),
+        }))
+      },
+
       syncExtraChargeFromServer: (orderId, { extraFee, reason }) => {
         if (!extraFee || Number(extraFee) <= 0) {
           set((state) => ({
