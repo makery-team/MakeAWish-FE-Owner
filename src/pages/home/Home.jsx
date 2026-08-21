@@ -14,10 +14,14 @@ export default function Home() {
   const { todayOrders, fetchTodayOrders, getTodayBriefing } = useOrderStore()
   const briefing = getTodayBriefing()
 
-  // 홈 화면 진입 시 서버에서 최신 데이터 조회
+  // 홈 화면 진입 시 서버에서 최신 데이터 조회 및 4초 주기 자동 갱신
   useEffect(() => {
     fetchProfile()
     fetchTodayOrders()
+    const interval = setInterval(() => {
+      fetchTodayOrders()
+    }, 4000)
+    return () => clearInterval(interval)
   }, [fetchProfile, fetchTodayOrders])
 
   return (
