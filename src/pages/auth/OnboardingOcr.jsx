@@ -147,9 +147,14 @@ export default function OnboardingOcr() {
               </label>
 
               <label className="flex flex-col gap-1.5 mt-2">
-                <span className="text-sm font-semibold text-cake-ink flex items-center gap-1">
-                  <Tag size={16} className="text-cake-pink-500" /> 매장 핵심 키워드 (선택)
-                </span>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-semibold text-cake-ink flex items-center gap-1">
+                    <Tag size={16} className="text-cake-pink-500" /> 매장 핵심 키워드 (선택)
+                  </span>
+                  <span className="text-xs text-cake-pink-500 font-medium">
+                    ({keywords.split(',').map(k => k.trim()).filter(Boolean).length}/7)
+                  </span>
+                </div>
                 <div className="flex flex-col gap-2">
                   <div className="flex flex-wrap gap-2">
                     {keywords.split(',').map((kw, i) => kw.trim() ? (
@@ -170,14 +175,18 @@ export default function OnboardingOcr() {
                   </div>
                   <input
                     type="text"
-                    placeholder="입력 후 엔터(Enter)나 쉼표(,)를 눌러주세요"
+                    placeholder={keywords.split(',').map(k => k.trim()).filter(Boolean).length >= 7 ? "최대 7개 키워드가 모두 등록되었습니다." : "입력 후 엔터(Enter)나 쉼표(,)를 눌러주세요"}
+                    disabled={keywords.split(',').map(k => k.trim()).filter(Boolean).length >= 7}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ',') {
                         e.preventDefault()
                         const val = e.target.value.trim()
                         if (val) {
-                          // 중복 방지 및 추가
                           const currentList = keywords.split(',').map(k => k.trim()).filter(Boolean)
+                          if (currentList.length >= 7) {
+                            alert('키워드는 최대 7개까지 등록할 수 있어요.')
+                            return
+                          }
                           if (!currentList.includes(val)) {
                             setKeywords(currentList.length > 0 ? `${keywords}, ${val}` : val)
                           }
@@ -185,11 +194,11 @@ export default function OnboardingOcr() {
                         }
                       }
                     }}
-                    className="rounded-xl border border-cake-pink-200 px-4 py-3 text-sm outline-none focus:border-cake-pink-400 focus:ring-2 focus:ring-cake-pink-100"
+                    className="rounded-xl border border-cake-pink-200 px-4 py-3 text-sm outline-none focus:border-cake-pink-400 focus:ring-2 focus:ring-cake-pink-100 disabled:bg-gray-50 disabled:opacity-60"
                   />
                 </div>
                 <span className="text-xs text-cake-ink-soft pl-1">
-                  입력해주시면 AI 소개글 생성 시 더 자연스럽게 반영됩니다. (예: 수제 케이크, 귀여운)
+                  💡 <b>3~5개</b> 등록 시 가장 자연스러운 AI 소개글이 완성됩니다. (최대 7개)
                 </span>
               </label>
 
