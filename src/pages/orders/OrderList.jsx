@@ -50,6 +50,8 @@ export default function OrderList() {
 
   useEffect(() => {
     loadOrders()
+    const interval = setInterval(loadOrders, 4000)
+    return () => clearInterval(interval)
   }, [])
 
   const filtered = filter === 'ALL' ? orders : orders.filter((o) => {
@@ -61,7 +63,7 @@ export default function OrderList() {
     if (filter === 'COMPLETED') return o.status === 'COMPLETED'
     return o.status === filter
   })
-  const sorted = [...filtered].sort((a, b) => (a.requestedDate < b.requestedDate ? 1 : -1))
+  const sorted = [...filtered].sort((a, b) => (Number(b.id || 0) - Number(a.id || 0)))
 
   return (
     <div>
