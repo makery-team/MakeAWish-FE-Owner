@@ -20,9 +20,9 @@ import { useShopStore } from './useShopStore'
 export const useOrderStore = create(
   persist(
     (set, get) => ({
-      orders: INITIAL_ORDERS,
-      extraCharges: INITIAL_EXTRA_CHARGES,
-      payments: INITIAL_PAYMENTS,
+      orders: [],
+      extraCharges: [],
+      payments: [],
       messageDrafts: {}, // orderId -> string
       schemaFields: ORDER_SCHEMA_FIELDS,
 
@@ -44,7 +44,7 @@ export const useOrderStore = create(
       getOrderById: (orderId) => get().orders.find((o) => String(o.id) === String(orderId)),
       getExtraChargesByOrder: (orderId) => get().extraCharges.filter((c) => String(c.orderId) === String(orderId)),
       getPaymentByOrder: (orderId) => get().payments.find((p) => String(p.orderId) === String(orderId)),
-      resetOrders: () => set({ orders: INITIAL_ORDERS, todayOrders: [] }),
+      resetOrders: () => set({ orders: [], todayOrders: [] }),
 
       fetchTodayOrders: async () => {
         try {

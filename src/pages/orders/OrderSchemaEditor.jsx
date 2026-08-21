@@ -7,6 +7,14 @@ import Card from '../../components/ui/Card'
 import Button from '../../components/ui/Button'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
+const DEFAULT_RECOMMENDED_SCHEMA = [
+  { id: 'size', label: '케이크 사이즈 (도시락, 미니, 1호, 2호, 3호)' },
+  { id: 'flavor', label: '시트 및 크림 맛 (바닐라생크림, 초코가나슈, 오레오, 얼그레이)' },
+  { id: 'lettering', label: '레터링 문구 (케이크 위 및 케이크 판 문구, 20자 이내)' },
+  { id: 'pickupDate', label: '픽업 희망 일시 (날짜 및 시간)' },
+  { id: 'request', label: '알러지 및 추가 요청사항' },
+]
+
 export default function OrderSchemaEditor() {
   const { profile } = useShopStore()
   const { updateSchemaFields } = useOrderStore()
@@ -128,13 +136,35 @@ export default function OrderSchemaEditor() {
         </div>
 
         <div className="mb-2 rounded-2xl bg-cake-pink-50 p-4 text-[13px] leading-relaxed text-cake-pink-700">
-          <p className="mb-1 font-bold text-cake-pink-600">💡 팁</p>
-          <p>항목 이름과 함께 <b>옵션(예: 1호, 2호)</b>이나 <b>제약사항(예: 20자 이내)</b>을 자유롭게 입력해주세요. 입력하신 내용은 AI 점원의 고객 응대 가이드로 활용됩니다.</p>
+          <div className="flex items-center justify-between">
+            <p className="font-bold text-cake-pink-600">💡 주문서 양식 설정 가이드</p>
+            <button
+              type="button"
+              onClick={() => setFields(DEFAULT_RECOMMENDED_SCHEMA)}
+              className="text-xs font-bold text-cake-pink-600 underline hover:text-cake-pink-700"
+            >
+              ✨ 추천 기본 양식 불러오기
+            </button>
+          </div>
+          <p className="mt-1">
+            항목 이름과 함께 <b>옵션(예: 1호, 2호)</b>이나 <b>제약사항(예: 20자 이내)</b>을 자유롭게 입력해주세요. 입력하신 내용은 AI 점원의 고객 응대 가이드로 활용됩니다.
+          </p>
         </div>
         {isEmpty && (
-          <div className="flex flex-col items-center gap-2 py-10 text-center text-cake-ink-soft">
-            <p className="text-sm">아직 등록된 항목이 없어요</p>
-            <p className="text-xs text-cake-ink-muted">아래 버튼을 눌러 항목을 추가해 보세요</p>
+          <div className="flex flex-col items-center gap-3 py-8 text-center text-cake-ink-soft bg-white rounded-2xl border border-cake-pink-100 p-6 shadow-sm">
+            <div className="text-2xl">📋</div>
+            <p className="text-sm font-bold text-cake-ink">아직 등록된 양식 항목이 없어요</p>
+            <p className="text-xs text-cake-ink-muted leading-relaxed">
+              주문제작 케이크의 5대 필수 항목(사이즈, 맛, 레터링, 픽업일시, 요청사항)을<br />
+              원클릭으로 불러와 빠르게 설정을 시작해보세요!
+            </p>
+            <Button
+              variant="secondary"
+              className="mt-1 text-xs border border-cake-pink-300 text-cake-pink-600 hover:bg-cake-pink-50 font-bold"
+              onClick={() => setFields(DEFAULT_RECOMMENDED_SCHEMA)}
+            >
+              ✨ 추천 기본 양식 5개 불러오기
+            </Button>
           </div>
         )}
 
