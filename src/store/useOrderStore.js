@@ -64,7 +64,7 @@ export const useOrderStore = create(
       updateOrderStatus: async (orderId, status, reason) => {
         if (!isMockOrderId(orderId)) {
           try {
-            await apiUpdateOrderStatus(orderId, status)
+            await apiUpdateOrderStatus(orderId, status, reason)
           } catch (error) {
             console.error('[useOrderStore] 실서버 주문 상태 변경 실패:', error.message)
             throw error

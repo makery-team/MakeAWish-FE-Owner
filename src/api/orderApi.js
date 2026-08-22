@@ -40,15 +40,19 @@ export async function fetchOrderById(orderId) {
  * @param {number|string} orderId
  * @param {string} status - 변경할 주문 상태 대문자 Enum
  */
-export async function updateOrderStatus(orderId, status) {
+export async function updateOrderStatus(orderId, status, reason = '') {
   if (isMockOrderId(orderId)) {
-    console.info('[orderApi] Mock 주문 ID 상태 변경 시도 (실서버 PATCH 생략):', orderId, status)
+    console.info('[orderApi] Mock 주문 ID 상태 변경 시도 (실서버 PATCH 생략):', orderId, status, reason)
     return { success: true, mock: true }
   }
   const upperStatus = String(status).toUpperCase()
+  const query = new URLSearchParams({ status: upperStatus })
+  if (reason) {
+    query.append('reason', reason)
+  }
   return await client.patch(
-    `/api/orders/${orderId}/status?status=${encodeURIComponent(upperStatus)}`,
-    { status: upperStatus }
+    `/api/orders/${orderId}/status?${query.toString()}`,
+    { status: upperStatus, reason, rejectReason: reason }
   )
 }
 
