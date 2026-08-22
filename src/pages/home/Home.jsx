@@ -1,9 +1,10 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Sparkle, CaretRight, ChartBar, Star } from '@phosphor-icons/react'
+import { Sparkle, CaretRight, ChartBar, Star, Bell } from '@phosphor-icons/react'
 import { useAuthStore } from '../../store/useAuthStore'
 import { useShopStore } from '../../store/useShopStore'
 import { useOrderStore } from '../../store/useOrderStore'
+import { useNotificationStore } from '../../store/useNotificationStore'
 import Card from '../../components/ui/Card'
 import { StatusBadge } from '../../components/ui/Badge'
 import EmptyState from '../../components/ui/EmptyState'
@@ -12,6 +13,7 @@ export default function Home() {
   const navigate = useNavigate()
   const { profile, fetchProfile } = useShopStore()
   const { todayOrders, fetchTodayOrders, getTodayBriefing } = useOrderStore()
+  const { unreadCount, setIsModalOpen } = useNotificationStore()
   const briefing = getTodayBriefing()
 
   // 홈 화면 진입 시 서버에서 최신 데이터 조회 및 4초 주기 자동 갱신
@@ -26,8 +28,23 @@ export default function Home() {
 
   return (
     <div className="px-5 pt-6">
-      <p className="text-sm text-cake-ink-soft">안녕하세요 👋</p>
-      <h1 className="font-display text-2xl text-cake-ink">{profile?.storeName || '매장'} 사장님</h1>
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm text-cake-ink-soft">안녕하세요 👋</p>
+          <h1 className="font-display text-2xl text-cake-ink">{profile?.storeName || '매장'} 사장님</h1>
+        </div>
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-white shadow-cake-sm ring-1 ring-cake-pink-100 active:scale-95 transition-all"
+        >
+          <Bell size={22} className="text-cake-ink" />
+          {unreadCount > 0 && (
+            <span className="absolute -top-1 -right-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-cake-pink-500 px-1 text-[10px] font-bold text-white shadow-cake-sm">
+              {unreadCount > 99 ? '99+' : unreadCount}
+            </span>
+          )}
+        </button>
+      </div>
 
       <Card className="mt-4 bg-gradient-to-br from-cake-pink-400 to-cake-pink-500 text-white">
         <div className="flex items-center gap-1.5 text-xs font-semibold text-white/90">
