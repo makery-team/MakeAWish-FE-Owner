@@ -4,7 +4,7 @@ import { PaperPlaneTilt } from '@phosphor-icons/react'
 import { useOrderStore } from '../../store/useOrderStore'
 import { useChatStore } from '../../store/useChatStore'
 import { fetchOrderById } from '../../api/orderApi'
-import { fetchChatRooms } from '../../api/chatApi'
+import { fetchChatRooms, createChatRoom } from '../../api/chatApi'
 import PageHeader from '../../components/ui/PageHeader'
 
 export default function OrderChat() {
@@ -24,22 +24,47 @@ export default function OrderChat() {
         if (orderData) {
           setServerOrder(orderData)
         }
-        const rooms = await fetchChatRooms()
         const customerId = orderData?.customerId || orderData?.userId || (orderData?.user && orderData.user.id)
         const customerName = orderData?.customerName || (orderData?.user && orderData.user.name) || orderData?.orderData?.customerName
-        
-        const matched = Array.isArray(rooms)
-          ? rooms.find((r) => {
-              const matchId = customerId && String(r.otherId) === String(customerId)
-              const matchName = customerName && r.otherName === customerName
-              return matchId || matchName
-            })
-          : null
 
-        if (matched) {
-          navigate(`/chat/${matched.roomNumber}`, {
+        let targetRoomNumber = null
+        let targetOtherId = customerId
+        let targetCustomerName = customerName || '고객님'
+
+        if (customerId) {
+          try {
+            const roomRes = await createChatRoom({ userId: customerId })
+            if (roomRes && roomRes.roomNumber) {
+              targetRoomNumber = roomRes.roomNumber
+              targetOtherId = roomRes.otherId || customerId
+              targetCustomerName = roomRes.otherName || customerName
+            }
+          } catch (e) {
+            console.warn('createChatRoom 실패 (fallback):', e)
+          }
+        }
+
+        if (!targetRoomNumber) {
+          const rooms = await fetchChatRooms()
+          const matched = Array.isArray(rooms)
+            ? rooms.find((r) => {
+                const matchId = customerId && String(r.otherId) === String(customerId)
+                const matchName = customerName && r.otherName === customerName
+                return matchId || matchName
+              })
+            : null
+
+          if (matched) {
+            targetRoomNumber = matched.roomNumber
+            targetOtherId = matched.otherId
+            targetCustomerName = matched.otherName || customerName
+          }
+        }
+
+        if (targetRoomNumber) {
+          navigate(`/chat/${targetRoomNumber}`, {
             replace: true,
-            state: { customerName: matched.otherName || customerName || '고객님', otherId: matched.otherId },
+            state: { customerName: targetCustomerName, otherId: targetOtherId },
           })
         }
       } catch (err) {

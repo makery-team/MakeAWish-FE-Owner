@@ -9,6 +9,15 @@ export async function fetchChatRooms() {
 }
 
 /**
+ * 1:1 채팅방 생성 또는 기존 방 조회
+ * POST /chatting/room
+ * @param {Object} data - { userId?: number, storeId?: number }
+ */
+export async function createChatRoom(data) {
+  return client.post('/chatting/room', data)
+}
+
+/**
  * 특정 채팅방의 과거 대화 메시지 내역 조회
  * GET /chatting/rooms/{roomNumber}/messages
  * @param {number|string} roomNumber

@@ -11,7 +11,7 @@ import {
 import { useOrderStore } from '../../store/useOrderStore'
 import { useChatStore } from '../../store/useChatStore'
 import { fetchOrderById, fetchExtraFee } from '../../api/orderApi'
-import { fetchChatRooms } from '../../api/chatApi'
+import { fetchChatRooms, createChatRoom } from '../../api/chatApi'
 import PageHeader from '../../components/ui/PageHeader'
 import Card from '../../components/ui/Card'
 import Button from '../../components/ui/Button'
@@ -231,30 +231,49 @@ export default function OrderDetail() {
         <button
           onClick={async () => {
             try {
-              // 1. 실서버 1:1 채팅방 목록 조회
-              const rooms = await fetchChatRooms()
-              // 2. 고객 ID 또는 고객 이름으로 해당 방 검색
-              const matched = Array.isArray(rooms)
-                ? rooms.find((r) => {
-                    const matchId = order.customerId && String(r.otherId) === String(order.customerId)
-                    const matchName = order.customerName && order.customerName !== '주문 고객' && r.otherName === order.customerName
-                    return matchId || matchName
-                  })
-                : null
+              let targetRoomNumber = null
+              let targetOtherId = order.customerId
+              let targetCustomerName = order.customerName || '고객님'
 
-              if (matched) {
-                navigate(`/chat/${matched.roomNumber}`, {
-                  state: { customerName: matched.otherName || order.customerName, otherId: matched.otherId },
-                })
-              } else if (Array.isArray(rooms) && rooms.length > 0) {
-                // 단일 방이 있거나 가장 최근 방으로 이동
-                navigate(`/chat/${rooms[0].roomNumber}`, {
-                  state: { customerName: rooms[0].otherName || order.customerName, otherId: rooms[0].otherId },
+              // 1. 고객 ID가 있는 경우, createChatRoom API로 즉시 방 개설 또는 기존 방 조회
+              if (order.customerId) {
+                try {
+                  const roomRes = await createChatRoom({ userId: order.customerId })
+                  if (roomRes && roomRes.roomNumber) {
+                    targetRoomNumber = roomRes.roomNumber
+                    targetOtherId = roomRes.otherId || order.customerId
+                    targetCustomerName = roomRes.otherName || order.customerName
+                  }
+                } catch (roomErr) {
+                  console.warn('createChatRoom 호출 실패 (fallback 탐색):', roomErr)
+                }
+              }
+
+              // 2. 만약 위에서 못 찾았거나 fallback인 경우 전체 방 목록에서 이름/ID 검색
+              if (!targetRoomNumber) {
+                const rooms = await fetchChatRooms()
+                const matched = Array.isArray(rooms)
+                  ? rooms.find((r) => {
+                      const matchId = order.customerId && String(r.otherId) === String(order.customerId)
+                      const matchName = order.customerName && order.customerName !== '주문 고객' && r.otherName === order.customerName
+                      return matchId || matchName
+                    })
+                  : null
+
+                if (matched) {
+                  targetRoomNumber = matched.roomNumber
+                  targetOtherId = matched.otherId
+                  targetCustomerName = matched.otherName || order.customerName
+                }
+              }
+
+              // 3. 채팅방으로 이동
+              if (targetRoomNumber) {
+                navigate(`/chat/${targetRoomNumber}`, {
+                  state: { customerName: targetCustomerName, otherId: targetOtherId },
                 })
               } else {
-                alert(
-                  `아직 ${order.customerName}님과의 1:1 채팅방이 열리지 않았습니다.\n소비자 앱에서 고객이 [1:1 채팅 문의]를 시작하면 실시간으로 연결됩니다.`
-                )
+                alert('고객과의 채팅방을 연결하지 못했습니다. 잠시 후 다시 시도해주세요.')
               }
             } catch (err) {
               console.error('채팅방 이동 실패:', err)
