@@ -1,22 +1,54 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { randomDelay } from '../lib/time'
-import {
-  INITIAL_STORE_PROFILE,
-  INITIAL_REVIEWS,
-  PROFILE_SUGGESTIONS,
-  PRICE_ANALYSIS,
-  REVIEW_SUMMARY,
-  STORE_INTRO_DRAFT,
-} from '../mocks/seed'
 import * as storeApi from '../api/storeApi'
 import * as reviewApi from '../api/reviewApi'
+
+const DEFAULT_BUSINESS_HOURS = {
+  mon: '09:00 - 20:00',
+  tue: '09:00 - 20:00',
+  wed: '09:00 - 20:00',
+  thu: '09:00 - 20:00',
+  fri: '09:00 - 20:00',
+  sat: '10:00 - 18:00',
+  sun: '휴무',
+}
+
+const DEFAULT_STORE_PROFILE = {
+  id: null,
+  storeName: '',
+  ownerName: '',
+  category: '주문제작 케이크',
+  categories: [],
+  intro: '',
+  address: '',
+  phone: '',
+  notice: '',
+  cautionNotice: '',
+  keywords: '',
+  profileImage: '',
+  imageUrl: '',
+  businessHours: DEFAULT_BUSINESS_HOURS,
+  rating: 5.0,
+  reviewCount: 0,
+}
+
+const DEFAULT_PRICE_ANALYSIS = {
+  myAvgPrice: 52000,
+  marketAvgPrice: 58000,
+  comparisonByCategory: [
+    { category: '레터링 케이크', my: 38000, market: 42000 },
+    { category: '캐릭터 케이크', my: 65000, market: 70000 },
+    { category: '웨딩 케이크', my: 220000, market: 250000 },
+    { category: '데일리 케이크', my: 32000, market: 35000 },
+  ],
+}
 
 export const useShopStore = create(
   persist(
     (set, get) => ({
-      profile: INITIAL_STORE_PROFILE,
-      reviews: INITIAL_REVIEWS,
+      profile: DEFAULT_STORE_PROFILE,
+      reviews: [],
       reviewsError: '',
       suggestions: [],
       priceAnalysis: null,
@@ -227,9 +259,9 @@ export const useShopStore = create(
       },
 
       fetchPriceAnalysis: async () => {
-        await randomDelay(900, 1500)
-        set({ priceAnalysis: PRICE_ANALYSIS })
-        return PRICE_ANALYSIS
+        await randomDelay(400, 800)
+        set({ priceAnalysis: DEFAULT_PRICE_ANALYSIS })
+        return DEFAULT_PRICE_ANALYSIS
       },
     }),
     {

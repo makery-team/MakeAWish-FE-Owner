@@ -12,7 +12,6 @@ export default function OrderChat() {
   const navigate = useNavigate()
   const { getOrderById } = useOrderStore()
   const { getMessages, sendMessage } = useChatStore()
-  const mockOrder = getOrderById(orderId)
   const messages = getMessages(orderId)
   const [serverOrder, setServerOrder] = useState(null)
   const [text, setText] = useState('')
@@ -74,7 +73,7 @@ export default function OrderChat() {
     initChat()
   }, [orderId, navigate])
 
-  const order = serverOrder || mockOrder
+  const order = serverOrder || getOrderById(orderId)
   const displayName = order?.customerName || (order?.user && order.user.name) || (order?.orderData && (order.orderData.customerName || order.orderData.name)) || '고객'
 
   const handleSend = () => {

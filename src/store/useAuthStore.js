@@ -1,9 +1,15 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { randomDelay } from '../lib/time'
-import { INITIAL_BUSINESS_LICENSE } from '../mocks/seed'
 import * as authApi from '../api/authApi'
 import * as userApi from '../api/userApi'
+
+const DEFAULT_BUSINESS_LICENSE = {
+  storeName: '달콤공방 케이크',
+  businessNumber: '123-45-67890',
+  representativeName: '김달콤',
+  address: '서울특별시 마포구 양화로 45',
+}
 
 export const useAuthStore = create(
   persist(
@@ -38,15 +44,11 @@ export const useAuthStore = create(
           let profile = {}
           try {
             profile = await userApi.getUserProfile()
-            // 디버깅: 백엔드에서 받아온 프로필 값 확인
-            alert('디버깅: 서버에서 받은 역할은 -> ' + profile.userRole)
-
             if (profile.userRole === 'ROLE_SELLER') {
               isOnboarded = true
             }
           } catch (e) {
             console.warn('프로필 조회 실패 (초기 가입자일 수 있음):', e)
-            alert('디버깅: 프로필 조회 실패! ' + e.message)
           }
 
           // 3. Zustand 스토어 상태 갱신
@@ -119,8 +121,8 @@ export const useAuthStore = create(
       createBusinessLicenseAnalysis: async () => {
         set({ businessLicenseStatus: 'ANALYZING' })
         await randomDelay(1400, 2200)
-        set({ businessLicenseStatus: 'DONE', businessLicense: INITIAL_BUSINESS_LICENSE })
-        return INITIAL_BUSINESS_LICENSE
+        set({ businessLicenseStatus: 'DONE', businessLicense: DEFAULT_BUSINESS_LICENSE })
+        return DEFAULT_BUSINESS_LICENSE
       },
 
       completeOnboarding: async (storeData) => {

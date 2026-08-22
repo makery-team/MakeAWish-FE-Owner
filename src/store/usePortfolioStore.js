@@ -1,13 +1,12 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { genId } from '../lib/time'
-import { INITIAL_PORTFOLIOS } from '../mocks/seed'
 import * as portfolioApi from '../api/portfolioApi'
 
 export const usePortfolioStore = create(
   persist(
     (set, get) => ({
-      portfolios: INITIAL_PORTFOLIOS,
+      portfolios: [],
       portfoliosError: '',
 
       fetchPortfolios: async (storeId = 1) => {
