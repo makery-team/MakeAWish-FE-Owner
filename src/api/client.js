@@ -1,7 +1,11 @@
 import { useAuthStore } from '../store/useAuthStore'
 
-// 1. 기본 API 주소 설정 (.env에 VITE_API_URL이 없으면 AWS Elastic Beanstalk 실서버 사용)
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://make-a-wish-env.eba-dvjn7a8x.ap-northeast-2.elasticbeanstalk.com'
+// 1. 기본 API 주소 설정 (Vercel HTTPS 배포 환경에서는 Mixed Content 방지를 위해 상대 경로 프록시 사용)
+const isHttps = typeof window !== 'undefined' && window.location.protocol === 'https:'
+const envApiUrl = import.meta.env.VITE_API_URL
+const BASE_URL = (envApiUrl && envApiUrl.startsWith('https')) 
+  ? envApiUrl 
+  : (isHttps ? '' : (envApiUrl || 'http://make-a-wish-env.eba-dvjn7a8x.ap-northeast-2.elasticbeanstalk.com'))
 
 /**
  * 토큰을 가져오는 함수 (Zustand store 또는 LocalStorage에서 획득)
