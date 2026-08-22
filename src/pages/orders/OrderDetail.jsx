@@ -61,6 +61,7 @@ export default function OrderDetail() {
             requestedDate: data.requestedDate || (data.pickupDate && String(data.pickupDate).split('T')[0]) || '2026-07-30',
             pickupTime: data.pickupTime || (data.pickupDate && String(data.pickupDate).split('T')[1]?.slice(0, 5)) || '14:00',
             schemaAnswers: data.schemaAnswers || data.customAnswers || data.orderData || {},
+            rejectReason: data.rejectReason || (data.orderData && data.orderData.rejectReason) || '',
             ...data,
           }
           setServerOrder(mapped)
@@ -110,7 +111,7 @@ export default function OrderDetail() {
     try {
       await updateOrderStatus(orderId, status, reason)
       if (serverOrder) {
-        setServerOrder((prev) => ({ ...prev, status }))
+        setServerOrder((prev) => ({ ...prev, status, ...(reason ? { rejectReason: reason } : {}) }))
       }
     } catch (error) {
       console.error('주문 상태 변경 실패:', error.message)
@@ -141,8 +142,8 @@ export default function OrderDetail() {
             </a>
           </div>
 
-          {order.status === 'REJECTED' && order.rejectReason && (
-            <p className="mt-2 rounded-xl bg-gray-50 p-2 text-xs text-gray-500">거절 사유: {order.rejectReason}</p>
+          {(order.status === 'REJECTED' || order.status === 'CANCELED') && order.rejectReason && (
+            <p className="mt-2 rounded-xl bg-red-50 p-2.5 text-xs text-red-600 font-medium">거절/취소 사유: {order.rejectReason}</p>
           )}
 
           <dl className="mt-3 grid grid-cols-3 gap-y-2 text-sm">
