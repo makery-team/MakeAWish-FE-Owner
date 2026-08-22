@@ -6,7 +6,16 @@ import Button from '../../components/ui/Button'
 import Card from '../../components/ui/Card'
 import Spinner from '../../components/ui/Spinner'
 import AddressSearchModal from '../../components/ui/AddressSearchModal'
-import { INITIAL_STORE_PROFILE } from '../../mocks/seed'
+
+const DEFAULT_BUSINESS_HOURS = [
+  { day: '월요일', open: '09:00', close: '20:00', closed: false },
+  { day: '화요일', open: '09:00', close: '20:00', closed: false },
+  { day: '수요일', open: '09:00', close: '20:00', closed: false },
+  { day: '목요일', open: '09:00', close: '20:00', closed: false },
+  { day: '금요일', open: '09:00', close: '20:00', closed: false },
+  { day: '토요일', open: '10:00', close: '18:00', closed: false },
+  { day: '일요일', open: '10:00', close: '18:00', closed: true },
+]
 
 export default function OnboardingOcr() {
   const navigate = useNavigate()
@@ -22,7 +31,7 @@ export default function OnboardingOcr() {
   const [detailAddress, setDetailAddress] = useState('')
   const [keywords, setKeywords] = useState('')
   const [isAddressModalOpen, setIsAddressModalOpen] = useState(false)
-  const [hoursForm, setHoursForm] = useState(INITIAL_STORE_PROFILE.businessHours)
+  const [hoursForm, setHoursForm] = useState(DEFAULT_BUSINESS_HOURS)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const updateHoursRow = (day, patch) => {

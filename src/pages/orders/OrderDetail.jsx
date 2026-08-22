@@ -124,10 +124,8 @@ export default function OrderDetail() {
 
   const isPaid = ['PAID', 'IN_PROGRESS', 'PICKUP_READY', 'COMPLETED'].includes(order.status)
   const extraTotal = extraCharges.reduce((sum, c) => sum + (Number(c.amount) || 0), 0)
-  const basePrice = serverOrder
-    ? Math.max(0, Number(serverOrder.totalPrice ?? serverOrder.price ?? 0) - extraTotal)
-    : Number(mockOrder?.price || 0)
-  const totalPrice = basePrice + extraTotal
+  const basePrice = Number(order.price || 0) - extraTotal
+  const totalPrice = Number(order.price || 0)
 
   return (
     <div className="pb-6">

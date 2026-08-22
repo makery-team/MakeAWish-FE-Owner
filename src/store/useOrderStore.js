@@ -2,26 +2,20 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { randomDelay, genId, todayIso } from '../lib/time'
 import {
-  ORDER_SCHEMA_FIELDS,
-  TODAY_BRIEFING,
-} from '../mocks/seed'
-import {
   updateOrderStatus as apiUpdateOrderStatus,
   registerExtraFee as apiRegisterExtraFee,
-  isMockOrderId,
   fetchOrders,
 } from '../api/orderApi'
 import { updateOrderSchema as apiUpdateOrderSchema } from '../api/storeApi'
 import { useShopStore } from './useShopStore'
 
-// 레거시 mock 캐시 정리
-try {
-  if (typeof window !== 'undefined' && window.localStorage) {
-    window.localStorage.removeItem('cake-orders')
-  }
-} catch (e) {
-  // ignore
-}
+const DEFAULT_ORDER_SCHEMA_FIELDS = [
+  { id: 'cakeType', label: '케이크 종류', type: 'text', required: true },
+  { id: 'size', label: '사이즈/호수', type: 'text', required: true },
+  { id: 'sheetFlavor', label: '시트 맛', type: 'text', required: true },
+  { id: 'creamFlavor', label: '크림 맛', type: 'text', required: true },
+  { id: 'letteringText', label: '레터링 문구', type: 'text', required: false },
+]
 
 export const useOrderStore = create(
   persist(
@@ -30,7 +24,7 @@ export const useOrderStore = create(
       extraCharges: [],
       payments: [],
       messageDrafts: {}, // orderId -> string
-      schemaFields: ORDER_SCHEMA_FIELDS,
+      schemaFields: DEFAULT_ORDER_SCHEMA_FIELDS,
 
       todayOrders: [],
       getTodayBriefing: () => {
@@ -62,15 +56,11 @@ export const useOrderStore = create(
       },
 
       updateOrderStatus: async (orderId, status, reason) => {
-        if (!isMockOrderId(orderId)) {
-          try {
-            await apiUpdateOrderStatus(orderId, status, reason)
-          } catch (error) {
-            console.error('[useOrderStore] 실서버 주문 상태 변경 실패:', error.message)
-            throw error
-          }
-        } else {
-          await randomDelay()
+        try {
+          await apiUpdateOrderStatus(orderId, status, reason)
+        } catch (error) {
+          console.error('[useOrderStore] 실서버 주문 상태 변경 실패:', error.message)
+          throw error
         }
         set((state) => ({
           orders: state.orders.map((o) =>
@@ -80,15 +70,11 @@ export const useOrderStore = create(
       },
 
       createExtraCharge: async (orderId, { reason, amount }) => {
-        if (!isMockOrderId(orderId)) {
-          try {
-            await apiRegisterExtraFee(orderId, { amount, reason })
-          } catch (error) {
-            console.error('[useOrderStore] 실서버 추가금 책정/등록 실패:', error.message)
-            throw error
-          }
-        } else {
-          await randomDelay()
+        try {
+          await apiRegisterExtraFee(orderId, { amount, reason })
+        } catch (error) {
+          console.error('[useOrderStore] 실서버 추가금 책정/등록 실패:', error.message)
+          throw error
         }
         const charge = { id: genId('extra'), orderId, reason, amount: Number(amount), createdAt: todayIso() }
         set((state) => ({
@@ -98,15 +84,11 @@ export const useOrderStore = create(
       },
 
       deleteExtraCharge: async (orderId) => {
-        if (!isMockOrderId(orderId)) {
-          try {
-            await apiRegisterExtraFee(orderId, { amount: 0, reason: '' })
-          } catch (error) {
-            console.error('[useOrderStore] 실서버 추가금 삭제 실패:', error.message)
-            throw error
-          }
-        } else {
-          await randomDelay()
+        try {
+          await apiRegisterExtraFee(orderId, { amount: 0, reason: '' })
+        } catch (error) {
+          console.error('[useOrderStore] 실서버 추가금 삭제 실패:', error.message)
+          throw error
         }
         set((state) => ({
           extraCharges: state.extraCharges.filter((c) => String(c.orderId) !== String(orderId)),
