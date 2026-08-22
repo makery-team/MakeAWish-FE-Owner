@@ -7,6 +7,8 @@ import {
   Plus,
   Phone,
   Trash,
+  MagnifyingGlassPlus,
+  DownloadSimple,
 } from '@phosphor-icons/react'
 import { useOrderStore } from '../../store/useOrderStore'
 import { useChatStore } from '../../store/useChatStore'
@@ -17,6 +19,7 @@ import Card from '../../components/ui/Card'
 import Button from '../../components/ui/Button'
 import { StatusBadge } from '../../components/ui/Badge'
 import Spinner from '../../components/ui/Spinner'
+import ImageModal from '../../components/ui/ImageModal'
 
 const FIELD_LABEL = { size: '사이즈', pickupDate: '픽업일', lettering: '레터링 문구', request: '요청사항' }
 
@@ -97,6 +100,7 @@ export default function OrderDetail() {
   const [extraAmount, setExtraAmount] = useState('')
   const [paying, setPaying] = useState(false)
   const [draftLoading, setDraftLoading] = useState(false)
+  const [modalImage, setModalImage] = useState({ isOpen: false, url: '', title: '' })
 
   if (!order) {
     return (
@@ -165,17 +169,48 @@ export default function OrderDetail() {
 
           {order.schemaAnswers?.refImage && (
             <div className="mt-3">
-              <span className="text-xs text-cake-ink-soft">참고 이미지</span>
-              <img src={order.schemaAnswers.refImage} alt="참고 이미지" className="mt-1 h-32 w-32 rounded-2xl object-cover" />
+              <span className="text-xs font-semibold text-cake-ink-soft">참고 이미지</span>
+              <div 
+                onClick={() => setModalImage({ isOpen: true, url: order.schemaAnswers.refImage, title: '고객 참고 이미지' })}
+                className="group relative mt-1.5 h-36 w-36 overflow-hidden rounded-2xl border border-cake-pink-100 shadow-sm cursor-pointer transition hover:shadow-md active:scale-95"
+              >
+                <img 
+                  src={order.schemaAnswers.refImage} 
+                  alt="참고 이미지" 
+                  className="h-full w-full object-cover transition duration-200 group-hover:scale-105" 
+                />
+                <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 transition-opacity group-hover:opacity-100">
+                  <span className="flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-bold text-cake-ink shadow">
+                    <MagnifyingGlassPlus size={14} weight="bold" /> 크게 보기
+                  </span>
+                </div>
+              </div>
             </div>
           )}
 
-          {(order.schemaAnswers?.customizedImageUrl || order.schemaAnswers?.customized_image_url || order.schemaAnswers?.cakeImage || order.schemaAnswers?.selectedCakeImage) && (
-            <div className="mt-3">
-              <span className="text-xs text-cake-ink-soft">요청 이미지 (AI 스케치)</span>
-              <img src={order.schemaAnswers.customizedImageUrl || order.schemaAnswers.customized_image_url || order.schemaAnswers.cakeImage || order.schemaAnswers.selectedCakeImage} alt="요청 이미지" className="mt-1 h-32 w-32 rounded-2xl object-cover" />
-            </div>
-          )}
+          {(order.schemaAnswers?.customizedImageUrl || order.schemaAnswers?.customized_image_url || order.schemaAnswers?.cakeImage || order.schemaAnswers?.selectedCakeImage) && (() => {
+            const requestedImg = order.schemaAnswers.customizedImageUrl || order.schemaAnswers.customized_image_url || order.schemaAnswers.cakeImage || order.schemaAnswers.selectedCakeImage
+            return (
+              <div className="mt-3">
+                <span className="text-xs font-semibold text-cake-pink-600">요청 이미지 (AI 스케치 시안)</span>
+                <div 
+                  onClick={() => setModalImage({ isOpen: true, url: requestedImg, title: '고객 요청 AI 시안' })}
+                  className="group relative mt-1.5 h-44 w-44 overflow-hidden rounded-2xl border-2 border-cake-pink-200 shadow-sm cursor-pointer transition hover:border-cake-pink-400 hover:shadow-md active:scale-95"
+                >
+                  <img 
+                    src={requestedImg} 
+                    alt="요청 이미지" 
+                    className="h-full w-full object-cover transition duration-200 group-hover:scale-105" 
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 transition-opacity group-hover:opacity-100">
+                    <span className="flex items-center gap-1 rounded-full bg-white/95 px-3 py-1.5 text-xs font-bold text-cake-pink-600 shadow-md">
+                      <MagnifyingGlassPlus size={15} weight="bold" /> 시안 확대 / 다운로드
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )
+          })()}
 
           {!rejecting && (order.status === 'PENDING' || order.status === 'PENDING_QUOTE') && (
             <div className="mt-4 flex gap-2">
@@ -426,6 +461,13 @@ export default function OrderDetail() {
           )}
         </Card>
       </div>
+
+      <ImageModal
+        isOpen={modalImage.isOpen}
+        imageUrl={modalImage.url}
+        title={modalImage.title}
+        onClose={() => setModalImage({ isOpen: false, url: '', title: '' })}
+      />
     </div>
   )
 }
