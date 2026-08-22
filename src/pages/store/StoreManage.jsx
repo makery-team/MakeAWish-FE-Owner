@@ -8,6 +8,7 @@ import Card from '../../components/ui/Card'
 import Button from '../../components/ui/Button'
 import Spinner from '../../components/ui/Spinner'
 import AddressSearchModal from '../../components/ui/AddressSearchModal'
+import { compressImage } from '../../utils/imageCompressor'
 
 export default function StoreManage() {
   const { businessLicense } = useAuthStore()
@@ -120,11 +121,12 @@ export default function StoreManage() {
                 accept="image/*"
                 className="hidden"
                 onChange={async (e) => {
-                  const file = e.target.files?.[0]
-                  if (!file) return
+                  const rawFile = e.target.files?.[0]
+                  if (!rawFile) return
                   setUploadingImage(true)
                   try {
-                    await uploadProfileImage(file)
+                    const fileToUpload = await compressImage(rawFile)
+                    await uploadProfileImage(fileToUpload)
                   } catch (err) {
                     alert('사진 업로드 중 오류가 발생했습니다.')
                   } finally {

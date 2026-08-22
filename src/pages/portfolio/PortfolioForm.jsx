@@ -4,6 +4,7 @@ import { Sparkle, X, Plus } from '@phosphor-icons/react'
 import { usePortfolioStore } from '../../store/usePortfolioStore'
 import { useShopStore } from '../../store/useShopStore'
 import { uploadPortfolioImage } from '../../api/portfolioApi'
+import { compressImage } from '../../utils/imageCompressor'
 import PageHeader from '../../components/ui/PageHeader'
 import Card from '../../components/ui/Card'
 import Button from '../../components/ui/Button'
@@ -29,14 +30,16 @@ export default function PortfolioForm() {
   const [uploadError, setUploadError] = useState('')
 
   const handleImageSelect = async (e) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setImagePreviewUrl(URL.createObjectURL(file))
+    const rawFile = e.target.files?.[0]
+    if (!rawFile) return
+    setImagePreviewUrl(URL.createObjectURL(rawFile))
     setImageUrl(null)
     setUploadingImage(true)
     setUploadError('')
     try {
-      const uploaded = await uploadPortfolioImage(file)
+      // 🌟 고용량 카메라 사진 413 에러 방지용 클라이언트 압축
+      const fileToUpload = await compressImage(rawFile)
+      const uploaded = await uploadPortfolioImage(fileToUpload)
       setImageUrl(uploaded)
     } catch (err) {
       setUploadError(err.message || '이미지 업로드에 실패했어요. 다시 시도해주세요')
@@ -99,7 +102,7 @@ export default function PortfolioForm() {
               업로드 중…
             </div>
           )}
-          <input type="file" accept="image/*" capture="environment" onChange={handleImageSelect} className="hidden" />
+          <input type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
         </label>
         {uploadError && <p className="text-center text-xs font-medium text-red-500">{uploadError}</p>}
 
