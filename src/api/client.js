@@ -57,9 +57,15 @@ async function request(endpoint, options = {}) {
 
     // 401 Unauthorized 처리 (토큰 만료 혹은 인증 실패 시)
     if (response.status === 401) {
-      console.error('인증 토큰이 만료되었거나 유효하지 않습니다 (401 Unauthorized)')
-      // 필요한 경우 자동 로그아웃 처리
-      // useAuthStore.getState().logout()
+      console.warn('인증 토큰이 만료되었습니다. 로그인 화면으로 이동합니다. (401 Unauthorized)')
+      try {
+        useAuthStore.getState().logout()
+      } catch (e) {
+        console.warn('로그아웃 처리 중 에러:', e)
+      }
+      if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/login')) {
+        window.location.href = '/login'
+      }
     }
 
     // 204 No Content 등 본문이 없는 응답 처리

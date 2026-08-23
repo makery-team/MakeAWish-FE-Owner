@@ -31,6 +31,35 @@ export const useAuthStore = create(
           // 1. 백엔드(Spring)와 OAuth2 통신하여 자체 Access / Refresh 토큰 발급
           const res = await authApi.socialLogin('google', token)
 
+          // 0. 이전 세션의 매장 정보 캐시 초기화 (DB 초기화 및 다른 계정 로그인 대비)
+          localStorage.removeItem('cake-shop')
+          try {
+            const { useShopStore } = await import('./useShopStore')
+            useShopStore.setState({ 
+              profile: {
+                id: null,
+                storeName: '',
+                ownerName: '',
+                category: '주문제작 케이크',
+                categories: [],
+                intro: '',
+                address: '',
+                phone: '',
+                notice: '',
+                cautionNotice: '',
+                keywords: '',
+                profileImage: '',
+                imageUrl: '',
+                rating: 5.0,
+                reviewCount: 0,
+              }, 
+              reviews: [], 
+              suggestions: [] 
+            })
+          } catch (e) {
+            console.warn('매장 캐시 초기화 중 오류:', e)
+          }
+
           // 1. 공통 client.js에서 조회할 수 있도록 localStorage에 보관
           if (res.accessToken) {
             localStorage.setItem('auth_token', res.accessToken)
@@ -65,6 +94,14 @@ export const useAuthStore = create(
               avatar: 'https://picsum.photos/seed/owner-avatar/200/200',
             },
           })
+
+          // 4. 사장님 권한이면 최신 매장 프로필 백그라운드 동기화
+          if (isOnboarded) {
+            try {
+              const { useShopStore } = await import('./useShopStore')
+              useShopStore.getState().fetchProfile()
+            } catch (e) {}
+          }
           return { ...res, isOnboarded }
         } catch (error) {
           console.error('로그인 API 연동 실패:', error)
