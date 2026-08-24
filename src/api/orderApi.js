@@ -6,6 +6,7 @@ import { client } from './client'
  */
 export async function fetchOrders(params = {}) {
   const query = new URLSearchParams()
+  query.append('role', 'seller')
   if (params.date) {
     query.append('date', params.date)
   }
