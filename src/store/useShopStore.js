@@ -14,6 +14,8 @@ const DEFAULT_BUSINESS_HOURS = {
   sun: '휴무',
 }
 
+export const DEFAULT_PROFILE_IMAGE = 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=300&q=80'
+
 const DEFAULT_STORE_PROFILE = {
   id: null,
   storeName: '',
@@ -26,8 +28,8 @@ const DEFAULT_STORE_PROFILE = {
   notice: '',
   cautionNotice: '',
   keywords: '',
-  profileImage: '',
-  imageUrl: '',
+  profileImage: DEFAULT_PROFILE_IMAGE,
+  imageUrl: DEFAULT_PROFILE_IMAGE,
   businessHours: DEFAULT_BUSINESS_HOURS,
   rating: 5.0,
   reviewCount: 0,
