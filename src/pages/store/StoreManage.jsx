@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PencilSimple, Clock, Sparkle, IdentificationCard, Tag, Star, TrendUp, Camera } from '@phosphor-icons/react'
-import { useShopStore } from '../../store/useShopStore'
+import { useShopStore, DEFAULT_PROFILE_IMAGE } from '../../store/useShopStore'
 import { useAuthStore } from '../../store/useAuthStore'
 import PageHeader from '../../components/ui/PageHeader'
 import Card from '../../components/ui/Card'
@@ -98,8 +98,13 @@ export default function StoreManage() {
           <div className="flex items-center gap-3">
             <div className="relative group shrink-0">
               <img
-                src={profile.imageUrl || profile.profileImage}
+                src={profile.imageUrl || profile.profileImage || DEFAULT_PROFILE_IMAGE}
                 alt="매장 프로필"
+                onError={(e) => {
+                  if (e.target.src !== DEFAULT_PROFILE_IMAGE) {
+                    e.target.src = DEFAULT_PROFILE_IMAGE
+                  }
+                }}
                 className="h-16 w-16 rounded-2xl object-cover ring-2 ring-cake-pink-100"
               />
               <button
