@@ -5,6 +5,10 @@
       "destination": "http://make-a-wish-env.eba-dvjn7a8x.ap-northeast-2.elasticbeanstalk.com/api/:path*"
     },
     {
+      "source": "/chatting/:path*",
+      "destination": "http://make-a-wish-env.eba-dvjn7a8x.ap-northeast-2.elasticbeanstalk.com/chatting/:path*"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
