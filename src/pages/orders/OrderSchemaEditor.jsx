@@ -51,20 +51,28 @@ export default function OrderSchemaEditor() {
         const props = selectedMenu.orderSchema.properties
         const newFields = Object.keys(props).map((key) => ({
           id: key,
-          label: props[key].label || props[key].description || ''
+          label: key === 'request' ? '알러지 및 추가 요청사항' : (props[key].label || props[key].description || '')
         }))
+        // request 필드가 누락되어 있으면 항상 기본 필수 항목으로 추가
+        if (!newFields.some((f) => f.id === 'request')) {
+          newFields.push({ id: 'request', label: '알러지 및 추가 요청사항' })
+        }
         setFields(newFields)
       } else {
-        setFields([])
+        setFields(DEFAULT_RECOMMENDED_SCHEMA)
       }
     }
   }, [selectedMenuId, menus])
 
   const updateLabel = (id, label) => {
+    if (id === 'request') return // request 라벨은 '알러지 및 추가 요청사항'으로 고정
     setFields((prev) => prev.map((f) => (f.id === id ? { ...f, label } : f)))
   }
 
-  const removeField = (id) => setFields((prev) => prev.filter((f) => f.id !== id))
+  const removeField = (id) => {
+    if (id === 'request') return // 기본 필수 항목은 삭제 불가
+    setFields((prev) => prev.filter((f) => f.id !== id))
+  }
 
   const addField = () => {
     setFields((prev) => [
@@ -75,8 +83,11 @@ export default function OrderSchemaEditor() {
 
   const handleSave = async () => {
     if (!selectedMenuId) return
-    const validFields = fields.filter((f) => f.label.trim() !== '')
-    // if (validFields.length === 0) return // 비어있게 저장할 수도 있으므로 주석 처리
+    let validFields = fields.filter((f) => f.label.trim() !== '')
+    // request 항목 보장
+    if (!validFields.some((f) => f.id === 'request')) {
+      validFields.push({ id: 'request', label: '알러지 및 추가 요청사항' })
+    }
 
     setSaving(true)
     await updateSchemaFields(selectedMenuId, validFields)
@@ -168,31 +179,56 @@ export default function OrderSchemaEditor() {
           </div>
         )}
 
-        {fields.map((f, index) => (
-          <Card key={f.id} className="flex items-center gap-3">
-            <DotsSixVertical size={18} className="shrink-0 text-cake-ink-muted" />
-            <div className="flex-1">
-              <textarea
-                value={f.label}
-                onChange={(e) => updateLabel(f.id, e.target.value)}
-                onInput={(e) => {
-                  e.target.style.height = 'auto'
-                  e.target.style.height = e.target.scrollHeight + 'px'
-                }}
-                rows={1}
-                placeholder="예: 케이크 사이즈 (1호, 2호, 미니)"
-                className="w-full resize-none overflow-hidden border-b border-transparent bg-transparent py-1 text-sm font-semibold text-cake-ink outline-none placeholder:text-cake-ink-muted focus:border-cake-pink-300"
-                autoFocus={f.label === ''}
-              />
-              <span className="mt-1 inline-block text-[10px] text-cake-ink-muted">
-                {index + 1}번째 질문
-              </span>
-            </div>
-            <button onClick={() => removeField(f.id)} className="text-cake-ink-soft active:text-red-400" aria-label="삭제">
-              <Trash size={18} />
-            </button>
-          </Card>
-        ))}
+        {fields.map((f, index) => {
+          const isRequired = f.id === 'request'
+          return (
+            <Card key={f.id} className={`flex items-center gap-3 ${isRequired ? 'bg-cake-pink-50/40 border border-cake-pink-100' : ''}`}>
+              <DotsSixVertical size={18} className="shrink-0 text-cake-ink-muted" />
+              <div className="flex-1">
+                {isRequired ? (
+                  <div className="py-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-bold text-cake-ink">알러지 및 추가 요청사항</span>
+                      <span className="rounded-full bg-cake-pink-100 px-2 py-0.5 text-[10px] font-bold text-cake-pink-600">
+                        기본 필수
+                      </span>
+                    </div>
+                    <p className="mt-0.5 text-xs text-cake-ink-muted">
+                      고객의 알러지 및 기타 특이사항을 빠짐없이 수렴하는 필수 항목이에요.
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    <textarea
+                      value={f.label}
+                      onChange={(e) => updateLabel(f.id, e.target.value)}
+                      onInput={(e) => {
+                        e.target.style.height = 'auto'
+                        e.target.style.height = e.target.scrollHeight + 'px'
+                      }}
+                      rows={1}
+                      placeholder="예: 케이크 사이즈 (1호, 2호, 미니)"
+                      className="w-full resize-none overflow-hidden border-b border-transparent bg-transparent py-1 text-sm font-semibold text-cake-ink outline-none placeholder:text-cake-ink-muted focus:border-cake-pink-300"
+                      autoFocus={f.label === ''}
+                    />
+                    <span className="mt-1 inline-block text-[10px] text-cake-ink-muted">
+                      {index + 1}번째 질문
+                    </span>
+                  </>
+                )}
+              </div>
+              {isRequired ? (
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-cake-pink-100/60 text-cake-pink-400" title="기본 필수 항목 (삭제 불가)">
+                  <span className="text-[11px] font-bold">🔒</span>
+                </div>
+              ) : (
+                <button onClick={() => removeField(f.id)} className="text-cake-ink-soft active:text-red-400" aria-label="삭제">
+                  <Trash size={18} />
+                </button>
+              )}
+            </Card>
+          )
+        })}
 
         <button
           onClick={addField}
