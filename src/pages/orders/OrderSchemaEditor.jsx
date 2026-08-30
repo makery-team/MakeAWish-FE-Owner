@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Trash, Plus, DotsSixVertical } from '@phosphor-icons/react'
+import { Trash, Plus, DotsSixVertical, CaretUp, CaretDown } from '@phosphor-icons/react'
 import { useOrderStore } from '../../store/useOrderStore'
 import { useShopStore } from '../../store/useShopStore'
 import PageHeader from '../../components/ui/PageHeader'
@@ -63,6 +63,52 @@ export default function OrderSchemaEditor() {
       }
     }
   }, [selectedMenuId, menus])
+
+  const [draggedIndex, setDraggedIndex] = useState(null)
+  const [dragOverIndex, setDragOverIndex] = useState(null)
+
+  const moveField = (index, direction) => {
+    const targetIndex = index + direction
+    if (targetIndex < 0 || targetIndex >= fields.length) return
+    const newFields = [...fields]
+    const temp = newFields[index]
+    newFields[index] = newFields[targetIndex]
+    newFields[targetIndex] = temp
+    setFields(newFields)
+  }
+
+  const handleDragStart = (e, index) => {
+    setDraggedIndex(index)
+    e.dataTransfer.effectAllowed = 'move'
+  }
+
+  const handleDragOver = (e, index) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'move'
+    if (dragOverIndex !== index) {
+      setDragOverIndex(index)
+    }
+  }
+
+  const handleDrop = (e, targetIndex) => {
+    e.preventDefault()
+    if (draggedIndex === null || draggedIndex === targetIndex) {
+      setDraggedIndex(null)
+      setDragOverIndex(null)
+      return
+    }
+    const newFields = [...fields]
+    const [draggedItem] = newFields.splice(draggedIndex, 1)
+    newFields.splice(targetIndex, 0, draggedItem)
+    setFields(newFields)
+    setDraggedIndex(null)
+    setDragOverIndex(null)
+  }
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null)
+    setDragOverIndex(null)
+  }
 
   const updateLabel = (id, label) => {
     if (id === 'request') return // request 라벨은 '알러지 및 추가 요청사항'으로 고정
@@ -181,10 +227,51 @@ export default function OrderSchemaEditor() {
 
         {fields.map((f, index) => {
           const isRequired = f.id === 'request'
+          const isDragging = draggedIndex === index
+          const isOver = dragOverIndex === index && draggedIndex !== index
+
           return (
-            <Card key={f.id} className={`flex items-center gap-3 ${isRequired ? 'bg-cake-pink-50/40 border border-cake-pink-100' : ''}`}>
-              <DotsSixVertical size={18} className="shrink-0 text-cake-ink-muted" />
-              <div className="flex-1">
+            <Card
+              key={f.id}
+              draggable
+              onDragStart={(e) => handleDragStart(e, index)}
+              onDragOver={(e) => handleDragOver(e, index)}
+              onDrop={(e) => handleDrop(e, index)}
+              onDragEnd={handleDragEnd}
+              className={`flex items-center gap-2 transition-all duration-150 ${
+                isRequired ? 'bg-cake-pink-50/40 border border-cake-pink-100' : ''
+              } ${isDragging ? 'opacity-40 scale-[0.98]' : ''} ${
+                isOver ? 'border-2 border-cake-pink-400 bg-cake-pink-50/60' : ''
+              }`}
+            >
+              {/* Drag Handle & Up/Down Arrows */}
+              <div className="flex flex-col items-center justify-center -my-1 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => moveField(index, -1)}
+                  disabled={index === 0}
+                  className="p-0.5 text-cake-ink-muted hover:text-cake-pink-600 disabled:opacity-20 disabled:hover:text-cake-ink-muted cursor-pointer"
+                  aria-label="위로 이동"
+                  title="위로 이동"
+                >
+                  <CaretUp size={14} weight="bold" />
+                </button>
+                <div className="cursor-grab active:cursor-grabbing p-0.5 text-cake-ink-muted hover:text-cake-ink">
+                  <DotsSixVertical size={16} />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => moveField(index, 1)}
+                  disabled={index === fields.length - 1}
+                  className="p-0.5 text-cake-ink-muted hover:text-cake-pink-600 disabled:opacity-20 disabled:hover:text-cake-ink-muted cursor-pointer"
+                  aria-label="아래로 이동"
+                  title="아래로 이동"
+                >
+                  <CaretDown size={14} weight="bold" />
+                </button>
+              </div>
+
+              <div className="flex-1 min-w-0">
                 {isRequired ? (
                   <div className="py-1">
                     <div className="flex items-center gap-2">
@@ -218,11 +305,11 @@ export default function OrderSchemaEditor() {
                 )}
               </div>
               {isRequired ? (
-                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-cake-pink-100/60 text-cake-pink-400" title="기본 필수 항목 (삭제 불가)">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-cake-pink-100/60 text-cake-pink-400" title="기본 필수 항목 (삭제 불가)">
                   <span className="text-[11px] font-bold">🔒</span>
                 </div>
               ) : (
-                <button onClick={() => removeField(f.id)} className="text-cake-ink-soft active:text-red-400" aria-label="삭제">
+                <button onClick={() => removeField(f.id)} className="shrink-0 p-1 text-cake-ink-soft active:text-red-400 hover:text-red-500 cursor-pointer" aria-label="삭제">
                   <Trash size={18} />
                 </button>
               )}
