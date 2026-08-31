@@ -47,12 +47,43 @@ export default function OrderSchemaEditor() {
     if (selectedMenuId && menus.length > 0) {
       const selectedMenu = menus.find((m) => m.id === selectedMenuId)
       if (selectedMenu && selectedMenu.orderSchema && selectedMenu.orderSchema.properties) {
-        // properties 객체를 배열로 변환
         const props = selectedMenu.orderSchema.properties
-        const newFields = Object.keys(props).map((key) => ({
-          id: key,
-          label: key === 'request' ? '알러지 및 추가 요청사항' : (props[key].label || props[key].description || '')
-        }))
+        const orderList = selectedMenu.orderSchema.order || selectedMenu.orderSchema.propertyOrder
+
+        let newFields = []
+        if (Array.isArray(orderList) && orderList.length > 0) {
+          // 1. 저장된 order 배열 순서대로 정렬
+          orderList.forEach((key) => {
+            if (props[key]) {
+              newFields.push({
+                id: key,
+                label: key === 'request' ? '알러지 및 추가 요청사항' : (props[key].label || props[key].description || '')
+              })
+            }
+          })
+          // 2. order 배열에 누락된 새 properties가 있다면 뒤에 추가
+          Object.keys(props).forEach((key) => {
+            if (!newFields.some(f => f.id === key)) {
+              newFields.push({
+                id: key,
+                label: key === 'request' ? '알러지 및 추가 요청사항' : (props[key].label || props[key].description || '')
+              })
+            }
+          })
+        } else {
+          // order 배열이 없는 경우: properties 내부의 order 속성 또는 키 순서로 정렬
+          const keys = Object.keys(props)
+          keys.sort((a, b) => {
+            const orderA = typeof props[a]?.order === 'number' ? props[a].order : 999
+            const orderB = typeof props[b]?.order === 'number' ? props[b].order : 999
+            return orderA - orderB
+          })
+          newFields = keys.map((key) => ({
+            id: key,
+            label: key === 'request' ? '알러지 및 추가 요청사항' : (props[key].label || props[key].description || '')
+          }))
+        }
+
         // request 필드가 누락되어 있으면 항상 기본 필수 항목으로 추가
         if (!newFields.some((f) => f.id === 'request')) {
           newFields.push({ id: 'request', label: '알러지 및 추가 요청사항' })
@@ -136,21 +167,31 @@ export default function OrderSchemaEditor() {
     }
 
     setSaving(true)
-    await updateSchemaFields(selectedMenuId, validFields)
-    useShopStore.getState().fetchProfile()
-    
-    // update local menus state to reflect changes without refetching immediately
-    const updatedProps = {}
-    validFields.forEach((f) => {
-      updatedProps[f.id] = { type: 'string', label: f.label }
-    })
-    
-    setMenus(prev => prev.map(m => m.id === selectedMenuId ? { ...m, orderSchema: { type: 'object', properties: updatedProps } } : m))
-    setFields(validFields)
-    
-    setSaving(false)
-    setSaved(true)
-    setTimeout(() => setSaved(false), 1500)
+    try {
+      await updateSchemaFields(selectedMenuId, validFields)
+      
+      const updatedProps = {}
+      const order = validFields.map((f) => f.id)
+      validFields.forEach((f, idx) => {
+        updatedProps[f.id] = { type: 'string', label: f.label, order: idx }
+      })
+      
+      setMenus((prev) =>
+        prev.map((m) =>
+          m.id === selectedMenuId ? { ...m, orderSchema: { type: 'object', properties: updatedProps, order } } : m,
+        ),
+      )
+      setFields(validFields)
+      
+      await useShopStore.getState().fetchProfile()
+      
+      setSaved(true)
+      setTimeout(() => setSaved(false), 1500)
+    } catch (e) {
+      alert('양식 저장 중 오류가 발생했습니다: ' + (e.message || '네트워크 에러'))
+    } finally {
+      setSaving(false)
+    }
   }
 
   const isEmpty = fields.length === 0

@@ -140,12 +140,13 @@ export const useOrderStore = create(
         // 1. 상태 업데이트
         set({ schemaFields: fields })
 
-        // 2. 백엔드가 요구하는 JSON Schema 형태로 변환
+        // 2. 백엔드가 요구하는 JSON Schema 형태로 변환 (순서 보장을 위해 order 배열 및 order 필드 추가)
         const properties = {}
-        fields.forEach((f) => {
-          properties[f.id] = { type: 'string', label: f.label }
+        const order = fields.map((f) => f.id)
+        fields.forEach((f, idx) => {
+          properties[f.id] = { type: 'string', label: f.label, order: idx }
         })
-        const orderSchema = { type: 'object', properties }
+        const orderSchema = { type: 'object', properties, order }
 
         // 3. storeId를 가져와 API 호출
         try {
@@ -157,7 +158,7 @@ export const useOrderStore = create(
           await apiUpdateOrderSchema(storeId, { productId, orderSchema })
         } catch (error) {
           console.error('주문서 양식 저장 실패:', error)
-          // 실패 시 알림 띄우기 등의 처리 필요
+          throw error
         }
       },
     }),
