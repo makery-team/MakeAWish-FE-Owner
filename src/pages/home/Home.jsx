@@ -1,22 +1,50 @@
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Sparkle, CaretRight, ChartBar } from '@phosphor-icons/react'
+import { Sparkle, CaretRight, ChartBar, Star, Bell } from '@phosphor-icons/react'
 import { useAuthStore } from '../../store/useAuthStore'
+import { useShopStore } from '../../store/useShopStore'
 import { useOrderStore } from '../../store/useOrderStore'
+import { useNotificationStore } from '../../store/useNotificationStore'
 import Card from '../../components/ui/Card'
 import { StatusBadge } from '../../components/ui/Badge'
 import EmptyState from '../../components/ui/EmptyState'
 
 export default function Home() {
   const navigate = useNavigate()
-  const { user } = useAuthStore()
-  const { getTodayOrders, getTodayBriefing } = useOrderStore()
-  const todayOrders = getTodayOrders()
+  const { profile, fetchProfile } = useShopStore()
+  const { todayOrders, fetchTodayOrders, getTodayBriefing } = useOrderStore()
+  const { unreadCount, setIsModalOpen } = useNotificationStore()
   const briefing = getTodayBriefing()
+
+  // 홈 화면 진입 시 서버에서 최신 데이터 조회 및 4초 주기 자동 갱신
+  useEffect(() => {
+    fetchProfile()
+    fetchTodayOrders()
+    const interval = setInterval(() => {
+      fetchTodayOrders()
+    }, 4000)
+    return () => clearInterval(interval)
+  }, [fetchProfile, fetchTodayOrders])
 
   return (
     <div className="px-5 pt-6">
-      <p className="text-sm text-cake-ink-soft">안녕하세요 👋</p>
-      <h1 className="font-display text-2xl text-cake-ink">{user?.name} 사장님</h1>
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm text-cake-ink-soft">안녕하세요 👋</p>
+          <h1 className="font-display text-2xl text-cake-ink">{profile?.storeName || '매장'} 사장님</h1>
+        </div>
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-white shadow-cake-sm ring-1 ring-cake-pink-100 active:scale-95 transition-all"
+        >
+          <Bell size={22} className="text-cake-ink" />
+          {unreadCount > 0 && (
+            <span className="absolute -top-1 -right-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-cake-pink-500 px-1 text-[10px] font-bold text-white shadow-cake-sm">
+              {unreadCount > 99 ? '99+' : unreadCount}
+            </span>
+          )}
+        </button>
+      </div>
 
       <Card className="mt-4 bg-gradient-to-br from-cake-pink-400 to-cake-pink-500 text-white">
         <div className="flex items-center gap-1.5 text-xs font-semibold text-white/90">
@@ -33,21 +61,33 @@ export default function Home() {
         </div>
       </Card>
 
-      <Card
-        onClick={() => navigate('/stats')}
-        className="mt-4 flex cursor-pointer items-center justify-between active:scale-[0.98]"
-      >
-        <div className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-cake-mint-100 text-cake-mint-600">
-            <ChartBar size={18} weight="fill" />
+      <div className="mt-4 grid grid-cols-2 gap-3">
+        <Card
+          onClick={() => navigate('/stats')}
+          className="flex cursor-pointer flex-col justify-between p-3.5 active:scale-[0.98]"
+        >
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-cake-mint-100 text-cake-mint-600">
+            <ChartBar size={17} weight="fill" />
           </div>
-          <div>
-            <p className="text-sm font-bold text-cake-ink">매출관리</p>
-            <p className="text-xs text-cake-ink-soft">매출 통계와 인기 메뉴를 확인해보세요</p>
+          <div className="mt-2">
+            <p className="text-xs font-bold text-cake-ink">매출 관리</p>
+            <p className="text-[11px] text-cake-ink-soft">통계 및 인기메뉴</p>
           </div>
-        </div>
-        <CaretRight size={16} className="text-cake-ink-soft" />
-      </Card>
+        </Card>
+
+        <Card
+          onClick={() => navigate('/reviews')}
+          className="flex cursor-pointer flex-col justify-between p-3.5 active:scale-[0.98]"
+        >
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 text-amber-600">
+            <Star size={17} weight="fill" />
+          </div>
+          <div className="mt-2">
+            <p className="text-xs font-bold text-cake-ink">리뷰 관리</p>
+            <p className="text-[11px] text-cake-ink-soft">고객 후기 & 답글</p>
+          </div>
+        </Card>
+      </div>
 
       <div className="mt-6 flex items-center justify-between">
         <h2 className="font-display text-lg text-cake-ink">오늘의 주문 ({todayOrders.length})</h2>
@@ -67,8 +107,13 @@ export default function Home() {
             className="flex cursor-pointer items-center justify-between active:scale-[0.98]"
           >
             <div>
-              <p className="font-semibold text-cake-ink">{order.customerName} · {order.cakeType}</p>
-              <p className="mt-0.5 text-xs text-cake-ink-soft">픽업 {order.pickupTime} · {order.price.toLocaleString()}원</p>
+              <p className="font-semibold text-cake-ink">
+                {order.customerName || `주문 ${order.orderNumber || order.id}`} 
+                {order.cakeType ? ` · ${order.cakeType}` : ''}
+              </p>
+              <p className="mt-0.5 text-xs text-cake-ink-soft">
+                픽업 {order.pickupTime || new Date(order.pickupDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} · {(order.price || order.totalPrice || 0).toLocaleString()}원
+              </p>
             </div>
             <StatusBadge status={order.status} />
           </Card>

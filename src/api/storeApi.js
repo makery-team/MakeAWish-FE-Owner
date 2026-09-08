@@ -34,14 +34,30 @@ export async function updateStoreProfile(data) {
   if (data.phone !== undefined) payload.phone = data.phone
   if (data.notice !== undefined) payload.notice = data.notice
   if (data.cautionNotice !== undefined) payload.cautionNotice = data.cautionNotice
+  if (data.keywords !== undefined) payload.keywords = data.keywords
+  if (data.imageUrl !== undefined || data.profileImage !== undefined) {
+    payload.imageUrl = data.imageUrl || data.profileImage
+  }
 
   return client.patch('/api/stores/profile', payload)
 }
 
+export async function uploadStoreImage(file) {
+  const formData = new FormData()
+  formData.append('file', file)
+  const res = await client.post('/api/images/upload', formData)
+  return res.imageUrl
+}
+
 export async function suggestProfileImprovement() {
-  return client.get('/api/profile-suggest')
+  return client.get('/api/stores/ai/profile-suggest')
 }
 
 export async function generateBio(payload = {}) {
-  return client.post('/api/generate-bio', payload)
+  return client.post('/api/stores/ai/generate-bio', payload)
+}
+export async function updateOrderSchema(storeId, payload) { return client.post(`/api/stores/${storeId}/order-schema`, payload) }
+
+export async function closeMyStore() {
+  return client.delete('/api/stores/me')
 }

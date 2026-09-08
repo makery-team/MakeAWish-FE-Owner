@@ -2,7 +2,9 @@ import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Sparkle, X, Plus } from '@phosphor-icons/react'
 import { usePortfolioStore } from '../../store/usePortfolioStore'
+import { useShopStore } from '../../store/useShopStore'
 import { uploadPortfolioImage } from '../../api/portfolioApi'
+import { compressImage } from '../../utils/imageCompressor'
 import PageHeader from '../../components/ui/PageHeader'
 import Card from '../../components/ui/Card'
 import Button from '../../components/ui/Button'
@@ -11,8 +13,10 @@ export default function PortfolioForm() {
   const { portfolioId } = useParams()
   const navigate = useNavigate()
   const { getById, createPortfolio, updatePortfolio, recommendTags } = usePortfolioStore()
+  const { profile } = useShopStore()
   const existing = portfolioId ? getById(portfolioId) : null
 
+  const [productId, setProductId] = useState(existing?.productId || (profile?.categories?.length > 0 ? profile.categories[0].id : null))
   const [title, setTitle] = useState(existing?.title || '')
   const [description, setDescription] = useState(existing?.description || '')
   const [tags, setTags] = useState(existing?.tags || [])
@@ -22,19 +26,20 @@ export default function PortfolioForm() {
   const [imagePreviewUrl, setImagePreviewUrl] = useState(existing?.imageUrl || null)
   const [imageUrl, setImageUrl] = useState(existing?.imageUrl || null)
   const [uploadingImage, setUploadingImage] = useState(false)
-  const [isInpaintingAllowed, setIsInpaintingAllowed] = useState(existing?.isInpaintingAllowed ?? true)
   const [saveError, setSaveError] = useState('')
   const [uploadError, setUploadError] = useState('')
 
   const handleImageSelect = async (e) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setImagePreviewUrl(URL.createObjectURL(file))
+    const rawFile = e.target.files?.[0]
+    if (!rawFile) return
+    setImagePreviewUrl(URL.createObjectURL(rawFile))
     setImageUrl(null)
     setUploadingImage(true)
     setUploadError('')
     try {
-      const uploaded = await uploadPortfolioImage(file)
+      // 🌟 고용량 카메라 사진 413 에러 방지용 클라이언트 압축
+      const fileToUpload = await compressImage(rawFile)
+      const uploaded = await uploadPortfolioImage(fileToUpload)
       setImageUrl(uploaded)
     } catch (err) {
       setUploadError(err.message || '이미지 업로드에 실패했어요. 다시 시도해주세요')
@@ -70,10 +75,10 @@ export default function PortfolioForm() {
     setSaving(true)
     setSaveError('')
     try {
-      const payload = { title, description, imageUrl, isInpaintingAllowed, tags }
+      const payload = { productId, title, description, imageUrl, tags }
       if (existing) await updatePortfolio(existing.id, payload)
       else await createPortfolio(payload)
-      navigate('/portfolio')
+      navigate('/menus')
     } catch (err) {
       setSaveError(err.message || '저장에 실패했어요. 다시 시도해주세요')
     } finally {
@@ -97,12 +102,23 @@ export default function PortfolioForm() {
               업로드 중…
             </div>
           )}
-          <input type="file" accept="image/*" capture="environment" onChange={handleImageSelect} className="hidden" />
+          <input type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
         </label>
         {uploadError && <p className="text-center text-xs font-medium text-red-500">{uploadError}</p>}
 
         <Card>
-          <label className="text-xs font-semibold text-cake-ink-soft">작품 제목</label>
+          <label className="text-xs font-semibold text-cake-ink-soft">메뉴(카테고리)</label>
+          <select
+            value={productId || ''}
+            onChange={(e) => setProductId(Number(e.target.value))}
+            className="mt-1 w-full rounded-xl border border-cake-pink-200 bg-white px-3 py-2 text-sm outline-none focus:border-cake-pink-400"
+          >
+            <option value="" disabled>메뉴를 선택해주세요</option>
+            {profile?.categories?.map(c => (
+              <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
+          </select>
+          <label className="mt-3 block text-xs font-semibold text-cake-ink-soft">작품 제목</label>
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
@@ -134,12 +150,46 @@ export default function PortfolioForm() {
           </div>
           {!imageUrl && <p className="mt-1 text-xs text-cake-ink-soft">이미지를 먼저 선택하면 태그를 추천받을 수 있어요</p>}
           {recommendError && <p className="mt-1 text-xs font-medium text-red-500">{recommendError}</p>}
+          
+          <div className="mt-2 flex items-center gap-1.5 rounded-xl bg-cake-pink-50/80 px-3 py-2 text-xs text-cake-pink-600">
+            <span>💡</span>
+            <span>첫 번째 태그는 소비자 앱 카드 좌측 상단에 <b>대표 뱃지</b>로 노출됩니다.</span>
+          </div>
+
           <div className="mt-2 flex flex-wrap gap-1.5">
             {tags.length === 0 && <p className="text-xs text-cake-ink-soft">등록된 태그가 없어요</p>}
-            {tags.map((t) => (
-              <span key={t} className="flex items-center gap-1 rounded-full bg-cake-lavender-100 px-2.5 py-1 text-xs font-medium text-cake-lavender-600">
+            {tags.map((t, idx) => (
+              <span
+                key={t}
+                className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-all ${
+                  idx === 0
+                    ? 'bg-cake-pink-500 text-white shadow-cake-xs'
+                    : 'bg-cake-lavender-100 text-cake-lavender-600'
+                }`}
+              >
+                {idx === 0 && (
+                  <span className="flex items-center gap-0.5 rounded-full bg-white/20 px-1.5 py-0.5 text-[10px] font-bold">
+                    ⭐ 대표
+                  </span>
+                )}
                 #{t}
-                <button onClick={() => setTags((prev) => prev.filter((tag) => tag !== t))} aria-label="태그 삭제">
+                {idx > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTags((prev) => [t, ...prev.filter((item) => item !== t)])
+                    }}
+                    title="대표 태그로 설정"
+                    className="text-[10px] underline opacity-75 hover:opacity-100"
+                  >
+                    대표로 설정
+                  </button>
+                )}
+                <button
+                  onClick={() => setTags((prev) => prev.filter((tag) => tag !== t))}
+                  aria-label="태그 삭제"
+                  className={idx === 0 ? 'text-white/80 hover:text-white' : 'text-cake-lavender-600'}
+                >
                   <X size={12} />
                 </button>
               </span>
@@ -168,27 +218,8 @@ export default function PortfolioForm() {
           </div>
         </Card>
 
-        <Card>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-bold text-cake-ink">AI 변형 허용</p>
-              <p className="mt-0.5 text-xs text-cake-ink-soft">허용하면 고객이 AI로 디자인을 변형해볼 수 있어요</p>
-            </div>
-            <button
-              type="button"
-              onClick={() => setIsInpaintingAllowed((v) => !v)}
-              aria-pressed={isInpaintingAllowed}
-              className={`relative h-7 w-12 shrink-0 rounded-full transition-colors ${isInpaintingAllowed ? 'bg-cake-pink-500' : 'bg-gray-200'}`}
-            >
-              <span
-                className={`absolute top-0.5 h-6 w-6 rounded-full bg-white transition-transform ${isInpaintingAllowed ? 'translate-x-5' : 'translate-x-0.5'}`}
-              />
-            </button>
-          </div>
-        </Card>
-
         {saveError && <p className="text-center text-xs font-medium text-red-500">{saveError}</p>}
-        <Button className="w-full" loading={saving} disabled={!title || !imageUrl || uploadingImage} onClick={handleSave}>
+        <Button className="w-full" loading={saving} disabled={!productId || !title || !imageUrl || uploadingImage} onClick={handleSave}>
           {existing ? '수정 완료' : '등록하기'}
         </Button>
       </div>

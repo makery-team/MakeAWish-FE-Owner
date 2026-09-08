@@ -1,12 +1,21 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { UploadSimple, CheckCircle, IdentificationCard, Storefront, Phone } from '@phosphor-icons/react'
+import { UploadSimple, CheckCircle, IdentificationCard, Storefront, Phone, Tag } from '@phosphor-icons/react'
 import { useAuthStore } from '../../store/useAuthStore'
 import Button from '../../components/ui/Button'
 import Card from '../../components/ui/Card'
 import Spinner from '../../components/ui/Spinner'
 import AddressSearchModal from '../../components/ui/AddressSearchModal'
-import { INITIAL_STORE_PROFILE } from '../../mocks/seed'
+
+const DEFAULT_BUSINESS_HOURS = [
+  { day: '월요일', open: '09:00', close: '20:00', closed: false },
+  { day: '화요일', open: '09:00', close: '20:00', closed: false },
+  { day: '수요일', open: '09:00', close: '20:00', closed: false },
+  { day: '목요일', open: '09:00', close: '20:00', closed: false },
+  { day: '금요일', open: '09:00', close: '20:00', closed: false },
+  { day: '토요일', open: '10:00', close: '18:00', closed: false },
+  { day: '일요일', open: '10:00', close: '18:00', closed: true },
+]
 
 export default function OnboardingOcr() {
   const navigate = useNavigate()
@@ -20,8 +29,9 @@ export default function OnboardingOcr() {
   const [phone, setPhone] = useState('')
   const [address, setAddress] = useState('')
   const [detailAddress, setDetailAddress] = useState('')
+  const [keywords, setKeywords] = useState('')
   const [isAddressModalOpen, setIsAddressModalOpen] = useState(false)
-  const [hoursForm, setHoursForm] = useState(INITIAL_STORE_PROFILE.businessHours)
+  const [hoursForm, setHoursForm] = useState(DEFAULT_BUSINESS_HOURS)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const updateHoursRow = (day, patch) => {
@@ -44,7 +54,7 @@ export default function OnboardingOcr() {
     setIsSubmitting(true)
     try {
       const finalAddress = detailAddress ? `${address}, ${detailAddress}` : address
-      await completeOnboarding({ name: storeName, phone, address: finalAddress, hours: hoursForm })
+      await completeOnboarding({ name: storeName, phone, address: finalAddress, hours: hoursForm, keywords })
       navigate('/home')
     } catch (error) {
       alert('매장 개설에 실패했습니다. 다시 시도해주세요.')
@@ -123,6 +133,7 @@ export default function OnboardingOcr() {
                   type="text"
                   value={storeName}
                   onChange={(e) => setStoreName(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault() }}
                   placeholder="예: 달콤공방"
                   className="rounded-xl border border-cake-pink-200 px-4 py-3 text-sm outline-none focus:border-cake-pink-400 focus:ring-2 focus:ring-cake-pink-100"
                   required
@@ -137,10 +148,67 @@ export default function OnboardingOcr() {
                   type="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault() }}
                   placeholder="예: 010-1234-5678"
                   className="rounded-xl border border-cake-pink-200 px-4 py-3 text-sm outline-none focus:border-cake-pink-400 focus:ring-2 focus:ring-cake-pink-100"
                   required
                 />
+              </label>
+
+              <label className="flex flex-col gap-1.5 mt-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-semibold text-cake-ink flex items-center gap-1">
+                    <Tag size={16} className="text-cake-pink-500" /> 매장 핵심 키워드 (선택)
+                  </span>
+                  <span className="text-xs text-cake-pink-500 font-medium">
+                    ({keywords.split(',').map(k => k.trim()).filter(Boolean).length}/7)
+                  </span>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <div className="flex flex-wrap gap-2">
+                    {keywords.split(',').map((kw, i) => kw.trim() ? (
+                      <span key={i} className="flex items-center gap-1 rounded-full bg-cake-pink-100 px-3 py-1 text-xs font-semibold text-cake-pink-600">
+                        #{kw.trim()}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newKw = keywords.split(',').map(k => k.trim()).filter((_, idx) => idx !== i).join(', ')
+                            setKeywords(newKw)
+                          }}
+                          className="ml-1 text-cake-pink-400 hover:text-cake-pink-600"
+                        >
+                          &times;
+                        </button>
+                      </span>
+                    ) : null)}
+                  </div>
+                  <input
+                    type="text"
+                    placeholder={keywords.split(',').map(k => k.trim()).filter(Boolean).length >= 7 ? "최대 7개 키워드가 모두 등록되었습니다." : "입력 후 엔터(Enter)나 쉼표(,)를 눌러주세요"}
+                    disabled={keywords.split(',').map(k => k.trim()).filter(Boolean).length >= 7}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ',') {
+                        e.preventDefault()
+                        const val = e.target.value.trim()
+                        if (val) {
+                          const currentList = keywords.split(',').map(k => k.trim()).filter(Boolean)
+                          if (currentList.length >= 7) {
+                            alert('키워드는 최대 7개까지 등록할 수 있어요.')
+                            return
+                          }
+                          if (!currentList.includes(val)) {
+                            setKeywords(currentList.length > 0 ? `${keywords}, ${val}` : val)
+                          }
+                          e.target.value = ''
+                        }
+                      }
+                    }}
+                    className="rounded-xl border border-cake-pink-200 px-4 py-3 text-sm outline-none focus:border-cake-pink-400 focus:ring-2 focus:ring-cake-pink-100 disabled:bg-gray-50 disabled:opacity-60"
+                  />
+                </div>
+                <span className="text-xs text-cake-ink-soft pl-1">
+                  💡 <b>3~5개</b> 등록 시 가장 자연스러운 AI 소개글이 완성됩니다. (최대 7개)
+                </span>
               </label>
 
               <div className="flex flex-col gap-1.5 mt-2">
@@ -150,6 +218,7 @@ export default function OnboardingOcr() {
                     type="text"
                     value={address}
                     readOnly
+                    onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault() }}
                     placeholder="버튼을 눌러 주소를 검색하세요"
                     className="flex-1 rounded-xl border border-cake-pink-200 px-4 py-3 text-sm bg-gray-50 text-gray-600 outline-none cursor-pointer"
                     onClick={() => setIsAddressModalOpen(true)}
@@ -163,6 +232,7 @@ export default function OnboardingOcr() {
                     type="text"
                     value={detailAddress}
                     onChange={(e) => setDetailAddress(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault() }}
                     placeholder="상세 주소를 입력해주세요 (예: 2층 201호)"
                     className="mt-1 rounded-xl border border-cake-pink-200 px-4 py-3 text-sm outline-none focus:border-cake-pink-400 focus:ring-2 focus:ring-cake-pink-100"
                   />

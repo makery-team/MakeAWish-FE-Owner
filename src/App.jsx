@@ -12,8 +12,11 @@ import OrderSchemaEditor from './pages/orders/OrderSchemaEditor'
 import PortfolioList from './pages/portfolio/PortfolioList'
 import PortfolioForm from './pages/portfolio/PortfolioForm'
 import StoreManage from './pages/store/StoreManage'
+import MenuManager from './pages/store/MenuManager'
+import ReviewManager from './pages/reviews/ReviewManager'
 import Stats from './pages/stats/Stats'
 import ChatManage from './pages/chat/ChatManage'
+import ChatRoom from './pages/chat/ChatRoom'
 
 function Gate({ children }) {
   const { isLoggedIn, onboarded } = useAuthStore()
@@ -41,12 +44,16 @@ export default function App() {
           <Route path="/orders/schema" element={<OrderSchemaEditor />} />
           <Route path="/orders/:orderId" element={<OrderDetail />} />
           <Route path="/orders/:orderId/chat" element={<OrderChat />} />
-          <Route path="/portfolio" element={<PortfolioList />} />
+          <Route path="/menus" element={<MenuManager />} />
+          <Route path="/portfolio" element={<Navigate to="/menus" replace />} />
           <Route path="/portfolio/new" element={<PortfolioForm />} />
           <Route path="/portfolio/:portfolioId/edit" element={<PortfolioForm />} />
           <Route path="/store" element={<StoreManage />} />
+          <Route path="/store/menus" element={<Navigate to="/menus" replace />} />
+          <Route path="/reviews" element={<ReviewManager />} />
           <Route path="/stats" element={<Stats />} />
           <Route path="/chat" element={<ChatManage />} />
+          <Route path="/chat/:roomNumber" element={<ChatRoom />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/home" replace />} />

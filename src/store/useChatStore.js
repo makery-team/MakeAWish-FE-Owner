@@ -1,12 +1,10 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { genId } from '../lib/time'
-import { INITIAL_CHATS } from '../mocks/seed'
-
 export const useChatStore = create(
   persist(
     (set, get) => ({
-      chats: INITIAL_CHATS,
+      chats: {},
 
       getMessages: (orderId) => get().chats[orderId] || [],
 
