@@ -3,7 +3,6 @@ import { useNavigate, useParams } from 'react-router-dom'
 import {
   ChatCircleDots,
   CreditCard,
-  Sparkle,
   Plus,
   Phone,
   Trash,
@@ -18,7 +17,6 @@ import PageHeader from '../../components/ui/PageHeader'
 import Card from '../../components/ui/Card'
 import Button from '../../components/ui/Button'
 import { StatusBadge } from '../../components/ui/Badge'
-import Spinner from '../../components/ui/Spinner'
 import ImageModal from '../../components/ui/ImageModal'
 
 const FIELD_LABEL = { size: '사이즈', pickupDate: '픽업일', lettering: '레터링 문구', request: '요청사항' }
@@ -35,15 +33,12 @@ export default function OrderDetail() {
     deleteExtraCharge,
     syncExtraChargeFromServer,
     createPayment,
-    createMessageDraft,
-    messageDrafts,
   } = useOrderStore()
   const { hasThread } = useChatStore()
 
   const mockOrder = getOrderById(orderId)
   const extraCharges = getExtraChargesByOrder(orderId)
   const payment = getPaymentByOrder(orderId)
-  const draft = messageDrafts[orderId]
 
   const [serverOrder, setServerOrder] = useState(null)
 
@@ -99,7 +94,6 @@ export default function OrderDetail() {
   const [extraReason, setExtraReason] = useState('')
   const [extraAmount, setExtraAmount] = useState('')
   const [paying, setPaying] = useState(false)
-  const [draftLoading, setDraftLoading] = useState(false)
   const [modalImage, setModalImage] = useState({ isOpen: false, url: '', title: '' })
 
   if (!order) {
@@ -387,6 +381,8 @@ export default function OrderDetail() {
                 value={extraAmount}
                 onChange={(e) => setExtraAmount(e.target.value)}
                 type="number"
+                min={0}
+                step={1000}
                 placeholder="금액"
                 className="rounded-xl border border-cake-pink-200 px-3 py-2 text-sm outline-none"
               />
@@ -439,25 +435,6 @@ export default function OrderDetail() {
             <p className="mt-2 text-xs text-cake-ink-soft">
               고객이 주문을 확인한 후 소비자 앱에서 토스페이먼츠로 결제를 진행합니다.
             </p>
-          )}
-        </Card>
-
-        <Card>
-          <p className="flex items-center gap-1.5 text-sm font-bold text-cake-ink"><Sparkle size={18} className="text-cake-pink-500" /> AI 메시지 초안</p>
-          {draftLoading && <Spinner label="AI가 메시지를 작성하고 있어요…" />}
-          {!draftLoading && draft && <p className="mt-2 rounded-2xl bg-cake-pink-50 p-3 text-sm leading-relaxed text-cake-ink">{draft}</p>}
-          {!draftLoading && (
-            <Button
-              variant="secondary"
-              className="mt-3 w-full"
-              onClick={async () => {
-                setDraftLoading(true)
-                await createMessageDraft(orderId)
-                setDraftLoading(false)
-              }}
-            >
-              {draft ? '다시 생성하기' : 'AI 메시지 초안 생성'}
-            </Button>
           )}
         </Card>
       </div>
