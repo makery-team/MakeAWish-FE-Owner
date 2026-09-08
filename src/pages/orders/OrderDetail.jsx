@@ -228,6 +228,8 @@ export default function OrderDetail() {
                 value={extraAmount}
                 onChange={(e) => setExtraAmount(e.target.value)}
                 type="number"
+                min={0}
+                step={1000}
                 placeholder="금액"
                 className="rounded-xl border border-cake-pink-200 px-3 py-2 text-sm outline-none"
               />
