@@ -9,7 +9,7 @@
   ```json
   {
     "source": "/chatting/:path*",
-    "destination": "http://make-a-wish-env.eba-dvjn7a8x.ap-northeast-2.elasticbeanstalk.com/chatting/:path*"
+    "destination": "http://Makery-env.eba-scsmpye9.ap-northeast-2.elasticbeanstalk.com/chatting/:path*"
   }
   ```
   규칙을 추가하여 `/chatting/room`, `/chatting/rooms`, `/chatting/rooms/:id/messages` 등 모든 채팅 API가 AWS 백엔드 서버로 정상 라우팅되도록 수정했습니다.

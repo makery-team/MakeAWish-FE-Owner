@@ -5,7 +5,7 @@ const isHttps = typeof window !== 'undefined' && window.location.protocol === 'h
 const envApiUrl = import.meta.env.VITE_API_URL
 const BASE_URL = (envApiUrl && envApiUrl.startsWith('https')) 
   ? envApiUrl 
-  : (isHttps ? '' : (envApiUrl || 'http://make-a-wish-env.eba-dvjn7a8x.ap-northeast-2.elasticbeanstalk.com'))
+  : (isHttps ? '' : (envApiUrl || 'http://Makery-env.eba-scsmpye9.ap-northeast-2.elasticbeanstalk.com'))
 
 /**
  * 토큰을 가져오는 함수 (Zustand store 또는 LocalStorage에서 획득)

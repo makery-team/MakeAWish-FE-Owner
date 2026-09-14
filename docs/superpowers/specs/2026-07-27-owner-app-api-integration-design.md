@@ -3,7 +3,7 @@
 ## 배경
 사장님 앱(`MakeAWish-FE-Owner`)은 현재 전부 Zustand 스토어의 mock 함수(`randomDelay` + 목데이터)로 동작한다. 관리 탭 기획 스펙 캡처의 7개 기능 중 6개를 실제 백엔드(Spring 서버 / AI 서버)와 연동한다.
 
-- Spring 서버: `http://make-a-wish-env.eba-dvjn7a8x.ap-northeast-2.elasticbeanstalk.com`
+- Spring 서버: `http://Makery-env.eba-scsmpye9.ap-northeast-2.elasticbeanstalk.com`
 - AI 서버: `https://makeawish-ai.onrender.com`
 
 ## 범위
