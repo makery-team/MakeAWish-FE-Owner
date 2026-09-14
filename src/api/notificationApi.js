@@ -64,7 +64,7 @@ export async function markAllNotificationsAsRead() {
 export function subscribeNotifications(onMessage, onError) {
   const token = localStorage.getItem('token') || localStorage.getItem('accessToken')
   // EventSource polyfill 또는 Fetch-based SSE
-  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080'
+  const baseUrl = import.meta.env.VITE_API_URL || 'http://Makery-env.eba-scsmpye9.ap-northeast-2.elasticbeanstalk.com'
   const url = `${baseUrl}/api/notifications/subscribe`
 
   let eventSource = null

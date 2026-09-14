@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useAuthStore } from '../store/useAuthStore'
 
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://make-a-wish-env.eba-dvjn7a8x.ap-northeast-2.elasticbeanstalk.com'
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://Makery-env.eba-scsmpye9.ap-northeast-2.elasticbeanstalk.com'
 
 export function useChatSocket(roomNumber, myUserId) {
   const [messages, setMessages] = useState([])

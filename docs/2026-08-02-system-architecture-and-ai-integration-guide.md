@@ -136,7 +136,7 @@ sequenceDiagram
 # =========================================================================
 
 # 1. API 서버 주소 (공개 정보)
-VITE_API_URL=http://make-a-wish-env.eba-dvjn7a8x.ap-northeast-2.elasticbeanstalk.com
+VITE_API_URL=http://Makery-env.eba-scsmpye9.ap-northeast-2.elasticbeanstalk.com
 
 # 2. Google OAuth Web Client ID (공개 식별자 - 브라우저 노출 안전)
 VITE_GOOGLE_CLIENT_ID=106131390766-mnqk6vkbs4n33s2tt63om1860e6cgaau.apps.googleusercontent.com

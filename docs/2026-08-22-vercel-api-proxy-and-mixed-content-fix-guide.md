@@ -1,7 +1,7 @@
 # 2026-08-22 Vercel HTTPS Mixed Content 방지 및 API 프록시 라우팅 가이드
 
 ## 1. 문제 원인
-- `https://make-a-wish-fe-owner.vercel.app`(HTTPS)에서 `http://make-a-wish-env.eba-dvjn7a8x.ap-northeast-2.elasticbeanstalk.com`(HTTP)으로 직접 API를 호출할 때 웹 브라우저(Chrome/Edge/Safari)의 보안 정책인 **Mixed Content (안전하지 않은 리소스 차단)**에 의해 모든 API 요청이 차단되었습니다.
+- `https://make-a-wish-fe-owner.vercel.app`(HTTPS)에서 `http://Makery-env.eba-scsmpye9.ap-northeast-2.elasticbeanstalk.com`(HTTP)으로 직접 API를 호출할 때 웹 브라우저(Chrome/Edge/Safari)의 보안 정책인 **Mixed Content (안전하지 않은 리소스 차단)**에 의해 모든 API 요청이 차단되었습니다.
 
 ---
 
