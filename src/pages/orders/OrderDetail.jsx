@@ -3,7 +3,6 @@ import { useNavigate, useParams } from 'react-router-dom'
 import {
   ChatCircleDots,
   CreditCard,
-  Sparkle,
   Plus,
   Phone,
   Trash,
@@ -18,7 +17,6 @@ import PageHeader from '../../components/ui/PageHeader'
 import Card from '../../components/ui/Card'
 import Button from '../../components/ui/Button'
 import { StatusBadge } from '../../components/ui/Badge'
-import Spinner from '../../components/ui/Spinner'
 import ImageModal from '../../components/ui/ImageModal'
 
 const FIELD_LABEL = { size: '사이즈', pickupDate: '픽업일', lettering: '레터링 문구', request: '요청사항' }
@@ -35,15 +33,12 @@ export default function OrderDetail() {
     deleteExtraCharge,
     syncExtraChargeFromServer,
     createPayment,
-    createMessageDraft,
-    messageDrafts,
   } = useOrderStore()
   const { hasThread } = useChatStore()
 
   const mockOrder = getOrderById(orderId)
   const extraCharges = getExtraChargesByOrder(orderId)
   const payment = getPaymentByOrder(orderId)
-  const draft = messageDrafts[orderId]
 
   const [serverOrder, setServerOrder] = useState(null)
 
@@ -53,6 +48,10 @@ export default function OrderDetail() {
       try {
         const data = await fetchOrderById(orderId)
         if (isMounted && data) {
+          const rawTotal = Number(data.totalPrice ?? data.price ?? 0)
+          const rawExtra = Number(data.extraFee || 0)
+          const basePrice = Math.max(0, rawTotal - rawExtra)
+
           const mapped = {
             id: data.id || data.orderId || orderId,
             status: data.orderStatus || data.status || 'PENDING',
@@ -60,7 +59,10 @@ export default function OrderDetail() {
             customerName: data.customerName || data.userName || (data.user && (data.user.name || data.user.nickname)) || (data.orderData && (data.orderData.customerName || data.orderData.name)) || '주문 고객',
             customerPhone: data.customerPhone || data.phoneNumber || (data.user && data.user.phoneNumber) || (data.orderData && (data.orderData.customerPhone || data.orderData.phone)) || '010-0000-0000',
             cakeType: data.cakeType || data.designName || (Array.isArray(data.items) && data.items[0]?.name) || (Array.isArray(data.items) && data.items[0]?.productName) || '주문제작 케이크',
-            price: Number(data.totalPrice ?? data.price ?? 0),
+            basePrice,
+            price: basePrice,
+            totalPrice: rawTotal,
+            extraFee: rawExtra,
             requestedDate: data.requestedDate || (data.pickupDate && String(data.pickupDate).split('T')[0]) || '2026-07-30',
             pickupTime: data.pickupTime || (data.pickupDate && String(data.pickupDate).split('T')[1]?.slice(0, 5)) || '14:00',
             schemaAnswers: data.schemaAnswers || data.customAnswers || data.orderData || {},
@@ -99,7 +101,6 @@ export default function OrderDetail() {
   const [extraReason, setExtraReason] = useState('')
   const [extraAmount, setExtraAmount] = useState('')
   const [paying, setPaying] = useState(false)
-  const [draftLoading, setDraftLoading] = useState(false)
   const [modalImage, setModalImage] = useState({ isOpen: false, url: '', title: '' })
 
   if (!order) {
@@ -128,8 +129,51 @@ export default function OrderDetail() {
 
   const isPaid = ['PAID', 'IN_PROGRESS', 'PICKUP_READY', 'COMPLETED'].includes(order.status)
   const extraTotal = extraCharges.reduce((sum, c) => sum + (Number(c.amount) || 0), 0)
-  const basePrice = Number(order.price || 0) - extraTotal
-  const totalPrice = Number(order.price || 0)
+  const basePrice = order.basePrice != null ? Number(order.basePrice) : Math.max(0, Number(order.price || order.totalPrice || 0) - extraTotal)
+  const totalPrice = basePrice + extraTotal
+
+  const IGNORED_SCHEMA_KEYS = [
+    'storeId',
+    'productId',
+    'portfolioId',
+    'shopName',
+    'tags',
+    'refImage',
+    'cakeImage',
+    'selectedCakeImage',
+    'photoUrl',
+    'customizedImageUrl',
+    'customized_image_url',
+    'design',
+  ]
+
+  const getDisplayPickupTime = () => {
+    const schema = order.schemaAnswers || {}
+    for (const [k, v] of Object.entries(schema)) {
+      if ((k.includes('픽업') || k.toLowerCase().includes('pickup')) && typeof v === 'string' && v.trim()) {
+        const val = v.trim()
+        const match = val.match(/(\d{4})[./-](\d{2})[./-](\d{2})[ T](\d{2}:\d{2})/)
+        if (match) {
+          return `${match[1]}-${match[2]}-${match[3]} ${match[4]}`
+        }
+        return val
+      }
+    }
+    if (order.pickupDate) {
+      return String(order.pickupDate).replace('T', ' ').slice(0, 16)
+    }
+    if (order.requestedDate && order.pickupTime) {
+      return `${order.requestedDate} ${order.pickupTime}`
+    }
+    return '미정'
+  }
+
+  const schemaEntries = Object.entries(order.schemaAnswers || {}).filter(([k]) => {
+    if (IGNORED_SCHEMA_KEYS.includes(k)) return false
+    const lower = k.toLowerCase()
+    if (k.includes('픽업') || lower.includes('pickup')) return false
+    return true
+  })
 
   return (
     <div className="pb-6">
@@ -148,24 +192,23 @@ export default function OrderDetail() {
             <p className="mt-2 rounded-xl bg-red-50 p-2.5 text-xs text-red-600 font-medium">거절/취소 사유: {order.rejectReason}</p>
           )}
 
-          <dl className="mt-3 grid grid-cols-3 gap-y-2 text-sm">
-            {order.schemaAnswers && Object.entries(order.schemaAnswers).map(([key, val]) => {
-              if (['refImage', 'customizedImageUrl', 'customized_image_url', 'cakeImage', 'selectedCakeImage'].includes(key)) return null; // 이미지는 아래에서 별도 렌더링
-              
-              // FIELD_LABEL에 있는 정적 키(size 등)는 그 라벨을 사용하고, 
-              // 동적 커스텀 키('케이크 사이즈', '맛' 등)는 key 자체를 렌더링
-              const label = FIELD_LABEL[key] || key;
-              
-              return (
-                <Fragment key={key}>
-                  <dt className="text-cake-ink-soft">{label}</dt>
-                  <dd className="col-span-2 text-cake-ink">{String(val)}</dd>
-                </Fragment>
-              );
-            })}
-            <dt className="text-cake-ink-soft">픽업 일시</dt>
-            <dd className="col-span-2 text-cake-ink">{order.requestedDate} {order.pickupTime}</dd>
-          </dl>
+          {schemaEntries.length > 0 || getDisplayPickupTime() !== '미정' ? (
+            <div className="mt-3 divide-y divide-cake-pink-100/60 rounded-2xl bg-cake-pink-50/40 p-3.5 text-sm">
+              {schemaEntries.map(([key, val]) => {
+                const label = FIELD_LABEL[key] || key
+                return (
+                  <div key={key} className="flex items-start justify-between py-2 first:pt-0 gap-3">
+                    <span className="shrink-0 text-xs font-medium text-cake-ink-soft">{label}</span>
+                    <span className="text-right text-sm font-semibold text-cake-ink break-words">{String(val)}</span>
+                  </div>
+                )
+              })}
+              <div className="flex items-center justify-between py-2 last:pb-0 gap-3">
+                <span className="shrink-0 text-xs font-medium text-cake-ink-soft">픽업 희망 일시</span>
+                <span className="text-right text-sm font-bold text-cake-pink-600">{getDisplayPickupTime()}</span>
+              </div>
+            </div>
+          ) : null}
 
           {order.schemaAnswers?.refImage && (
             <div className="mt-3">
@@ -356,7 +399,8 @@ export default function OrderDetail() {
                             if (serverOrder) {
                               setServerOrder((prev) => ({
                                 ...prev,
-                                totalPrice: Math.max(0, Number(prev.totalPrice || 0) - Number(c.amount)),
+                                extraFee: 0,
+                                totalPrice: prev.basePrice ?? Number(prev.price || 0),
                               }))
                             }
                           } catch (error) {
@@ -387,6 +431,8 @@ export default function OrderDetail() {
                 value={extraAmount}
                 onChange={(e) => setExtraAmount(e.target.value)}
                 type="number"
+                min={0}
+                step={1000}
                 placeholder="금액"
                 className="rounded-xl border border-cake-pink-200 px-3 py-2 text-sm outline-none"
               />
@@ -397,10 +443,14 @@ export default function OrderDetail() {
                   try {
                     await createExtraCharge(orderId, { reason: extraReason, amount: extraAmount })
                     if (serverOrder) {
-                      setServerOrder((prev) => ({
-                        ...prev,
-                        totalPrice: Number(prev.totalPrice || 0) + Number(extraAmount),
-                      }))
+                      setServerOrder((prev) => {
+                        const base = prev.basePrice ?? Number(prev.price || 0)
+                        return {
+                          ...prev,
+                          extraFee: Number(extraAmount),
+                          totalPrice: base + Number(extraAmount),
+                        }
+                      })
                     }
                     setExtraReason('')
                     setExtraAmount('')
@@ -415,9 +465,21 @@ export default function OrderDetail() {
               </Button>
             </div>
           )}
-          <div className="mt-3 flex items-center justify-between border-t border-dashed border-cake-pink-100 pt-2 text-sm font-bold text-cake-ink">
-            <span>총 금액</span>
-            <span>{totalPrice.toLocaleString()}원</span>
+          <div className="mt-3 flex flex-col gap-1.5 border-t border-dashed border-cake-pink-100 pt-2 text-sm">
+            <div className="flex items-center justify-between text-xs text-cake-ink-soft">
+              <span>기본 케이크 금액</span>
+              <span>{basePrice.toLocaleString()}원</span>
+            </div>
+            {extraTotal > 0 && (
+              <div className="flex items-center justify-between text-xs text-cake-pink-500 font-medium">
+                <span>추가금 합계</span>
+                <span>+{extraTotal.toLocaleString()}원</span>
+              </div>
+            )}
+            <div className="flex items-center justify-between text-sm font-bold text-cake-ink pt-1 border-t border-cake-pink-50">
+              <span>총 금액</span>
+              <span className="text-base text-cake-pink-600">{totalPrice.toLocaleString()}원</span>
+            </div>
           </div>
         </Card>
 
@@ -439,25 +501,6 @@ export default function OrderDetail() {
             <p className="mt-2 text-xs text-cake-ink-soft">
               고객이 주문을 확인한 후 소비자 앱에서 토스페이먼츠로 결제를 진행합니다.
             </p>
-          )}
-        </Card>
-
-        <Card>
-          <p className="flex items-center gap-1.5 text-sm font-bold text-cake-ink"><Sparkle size={18} className="text-cake-pink-500" /> AI 메시지 초안</p>
-          {draftLoading && <Spinner label="AI가 메시지를 작성하고 있어요…" />}
-          {!draftLoading && draft && <p className="mt-2 rounded-2xl bg-cake-pink-50 p-3 text-sm leading-relaxed text-cake-ink">{draft}</p>}
-          {!draftLoading && (
-            <Button
-              variant="secondary"
-              className="mt-3 w-full"
-              onClick={async () => {
-                setDraftLoading(true)
-                await createMessageDraft(orderId)
-                setDraftLoading(false)
-              }}
-            >
-              {draft ? '다시 생성하기' : 'AI 메시지 초안 생성'}
-            </Button>
           )}
         </Card>
       </div>

@@ -23,7 +23,6 @@ export const useOrderStore = create(
       orders: [],
       extraCharges: [],
       payments: [],
-      messageDrafts: {}, // orderId -> string
       schemaFields: DEFAULT_ORDER_SCHEMA_FIELDS,
 
       todayOrders: [],
@@ -126,14 +125,6 @@ export const useOrderStore = create(
         const payment = { orderId, amount: Number(amount), method, status: 'PAID', paidAt: todayIso() }
         set((state) => ({ payments: [...state.payments.filter((p) => p.orderId !== orderId), payment] }))
         return payment
-      },
-
-      createMessageDraft: async (orderId) => {
-        await randomDelay(800, 1400)
-        const order = get().getOrderById(orderId)
-        const draft = `안녕하세요 ${order?.customerName}님! 😊 주문해주신 ${order?.cakeType} 정성껏 준비하고 있어요. 픽업 예정 시간은 ${order?.pickupTime}이며, 궁금하신 점 있으시면 편하게 말씀해주세요. 감사합니다!`
-        set((state) => ({ messageDrafts: { ...state.messageDrafts, [orderId]: draft } }))
-        return draft
       },
 
       updateSchemaFields: async (productId, fields) => {
