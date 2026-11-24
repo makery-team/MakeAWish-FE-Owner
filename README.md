@@ -2,11 +2,11 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/React-v19-61DAFB?style=for-the-badge&logo=react&logoColor=black" />
-  <img src="https://img.shields.io/badge/Vite-v5-646CFF?style=for-the-badge&logo=vite&logoColor=white" />
-  <img src="https://img.shields.io/badge/Zustand-v4-black?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/Tailwind%20CSS-v3-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" />
+  <img src="https://img.shields.io/badge/Vite-v8-646CFF?style=for-the-badge&logo=vite&logoColor=white" />
+  <img src="https://img.shields.io/badge/Zustand-v5-black?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Tailwind%20CSS-v4-38B2AC?style=for-the-badge&logo=tailwindcss&logoColor=white" />
   <img src="https://img.shields.io/badge/SSE-Server--Sent%20Events-FF6B6B?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/Recharts-v2-22B8CF?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Recharts-v3-22B8CF?style=for-the-badge" />
 </p>
 
 MakeAWish 사장님 관리자 웹 포털 저장소입니다. 베이커리 소상공인이 매장의 커스텀 주문서 양식을 직접 설계하고, 실시간으로 수신되는 주문을 칸반 보드로 관리하며, 작업 난이도별 추가금을 투명하게 산정할 수 있는 백오피스 웹 애플리케이션입니다.
@@ -53,7 +53,7 @@ MakeAWish-FE-Owner/
 │   ├── main.jsx                        # 렌더링 엔트리
 │   ├── App.jsx                         # 라우팅 및 전역 레이아웃
 │   ├── api/                            # 백엔드 Spring Boot API 통신
-│   │   ├── client.js                   # Axios 인스턴스 및 토큰 인터셉터
+│   │   ├── client.js                   # 공통 API 클라이언트 및 인증 헤더 처리
 │   │   ├── authApi.js                  # 로그인 및 토큰 발급
 │   │   ├── orderApi.js                 # 주문 목록 및 상태 변경
 │   │   ├── portfolioApi.js             # 케이크 사진 업로드 및 태그 추출
